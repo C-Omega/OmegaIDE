@@ -1,2 +1,2 @@
 # IDE
-and IDE
+an IDE
