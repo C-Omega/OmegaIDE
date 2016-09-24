@@ -6,7 +6,7 @@ open C_Omega.Helpers
 open OmegaIDE.FSharp
 [<EntryPoint>]
 let main argv = 
-    let v = "@comment@//.*\n" |> Modules.Highlighting.SyntaxHighlighter.OfString
-    v.update "//hi\n//hi again\n" |> printfn "%A"
+    let v = "@comment@\(\*.*\*\);\n@comment@//.*\\n" |> Modules.Highlighting.SyntaxHighlighter.OfString
+    v.update "normal(*comment*)\n//comment 2\n" |> printfn "%A"
     0 // return an integer exit code
 
