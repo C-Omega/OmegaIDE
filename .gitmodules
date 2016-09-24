@@ -1,0 +1,3 @@
+[submodule "Backend/Core"]
+	path = Backend/Core
+	url = git@github.com:C-Omega/Core.git
