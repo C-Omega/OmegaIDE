@@ -119,12 +119,12 @@ module Modules =
                     let noncomments = Array.fold(fun (acc:string) (r:Match) -> 
                         let start = r.Index-1
                         let stop = r.Index+r.Length
-                        (if start < 0 then "" else acc.[..r.Index-1]) + String.replicate r.Length "\u0001" + (if stop >= acc.Length then "" else acc.[stop..])) s comments
+                        (if start < 0 then "" else acc.[..r.Index-1]) + "\u0001" + String.replicate (r.Length-1) "\u0002" + (if stop >= acc.Length then "" else acc.[stop..])) s comments
                     let literals = 
                         l 
                         |> Array.Parallel.map (fun (r:Regex) -> r.Matches(noncomments) |> Seq.cast<Match> |> Array.ofSeq)
                         |> Array.concat
-                    let rest = Array.fold(fun (acc:string) (r:Match) -> acc.[..r.Index-1] + String.replicate r.Length "\u0001" + acc.[r.Index+r.Length..]) noncomments literals
+                    let rest = Array.fold(fun (acc:string) (r:Match) -> acc.[..r.Index-1] + String.replicate r.Length "\u0003" + acc.[r.Index+r.Length..]) noncomments literals
                     let final = Array.Parallel.map (fun (t,r:Regex) -> (r.Matches(rest) |> Seq.cast<Match> |> Array.ofSeq),t) r
                     let x,y = 
                         Array.append [|comments,Comment;literals,Literal|] (final)
@@ -135,10 +135,19 @@ module Modules =
                             let stop = r.Index+r.Length
                             //r.Index::i,((if start < 0 then "" else acc.[..r.Index-1]) + String.replicate r.Length "\u0001" + (if stop >= acc.Length then "" else acc.[stop..]))
                             (r, acc.[r.Index..stop-1])::i,
-                            ((if start < 0 then "" else acc.[..r.Index-1]) + String.replicate r.Length "\u0001" + (if stop >= acc.Length then "" else acc.[stop..]))
+                            ((if start < 0 then "" else acc.[..r.Index-1]) + "\u0001" + String.replicate r.Length "\u0004" + (if stop >= acc.Length then "" else acc.[stop..]))
                         ) ([],s)
                         |> function |i,j -> List.rev i,j
                     let replace (s:string) p (a:string) = s.[..p] + a + s.[p+a.Length-1..]
+                    let normal = 
+                        let m = y.Split('\u0002') |> List.ofArray
+                        let rec inner = function
+                            |[],[],tokens -> List.rev tokens
+                            |[],finals,_ -> failwith "You have messed up, Harlan"
+                            |focus::stringparts,finals,tokens ->
+                                if focus = "" || focus.[0] = '\u0001' then inner(stringparts,finals.Tail,finals.Head::tokens) //you have picked up a final token
+                                else inner(stringparts,finals,(focus,Normal)::tokens)
+                        inner(m,x,[])
                     //nonfinal
                     Array.append [|comments,Comment;literals,LiteralString|] final
                     |> Array.map (fun (r,t) -> Array.map(fun (r:Match) -> t,s.[r.Index..r.Index+r.Length-1]) r)
