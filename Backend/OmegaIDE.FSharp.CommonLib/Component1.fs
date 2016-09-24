@@ -88,7 +88,7 @@ module Modules =
     type GraphicString   = {s:string; foreground : RGBA; background : RGBA; style : Style}
     module Highlighting =
         type SyntaxHighlighter = 
-            {update : string -> (KeywordType * string)[]}
+            {update : string -> (KeywordType * string)list}
             static member OfString(s:string) =
                 let s = System.Text.RegularExpressions.Regex.Replace(s,"[\r\n]","").Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
                 let rec parse = function
@@ -110,11 +110,79 @@ module Modules =
                 let c = Array.Parallel.choose (function |Comment, r -> Some r |_ -> None) t
                 let l = Array.Parallel.choose (function |Literal, r -> Some r |_ -> None) t
                 let r = Array.Parallel.choose (function |Comment,_ |Literal, _ -> None |a,b -> Some(a,b)) t
-                {update = fun s -> 
-                    let comments = 
-                        c 
-                        |> Array.Parallel.map (fun (r:Regex) -> r.Matches(s) |> Seq.cast<Match> |> Array.ofSeq) 
-                        |> Array.concat
+                let dematch(a:Match) = a.Index,a.Length
+                {update = fun str -> 
+                    let s,pass1 = 
+                        Array.fold (fun (s:string,stuff:(KeywordType*(int*int)) list) (r:Regex) -> 
+                            r.Matches(s) 
+                            |> Seq.cast<Match>
+                            |> Seq.fold(fun (acc:string,stuff:(KeywordType*_) list) (r:Match) ->
+                                let start = r.Index-1
+                                let stop = r.Index+r.Length
+                                (
+                                    (if start < 0 then "" else acc.[..r.Index-1]) +
+                                    String.replicate (r.Length-1) "\u0002" +
+                                    "\u0001" +
+                                    (if stop >= acc.Length then "" else acc.[stop..])
+                                ),(Comment,dematch r)::stuff) (s,stuff)
+                            ) (str,[]) c
+                    let s,pass2 =
+                        Array.fold (fun (s:string,stuff:(KeywordType*(int*int)) list) (r:Regex) -> 
+                            r.Matches(s) 
+                            |> Seq.cast<Match>
+                            |> Seq.fold(fun (acc:string,stuff:(KeywordType*_) list) (r:Match) ->
+                                let start = r.Index-1
+                                let stop = r.Index+r.Length
+                                (
+                                    (if start < 0 then "" else acc.[..r.Index-1]) +
+                                    String.replicate (r.Length-1) "\u0002" +
+                                    "\u0001" +
+                                    (if stop >= acc.Length then "" else acc.[stop+0..])
+                                ),(Comment,dematch r)::stuff) (s,stuff) 
+                            ) (s,pass1) c
+                    let s,pass3 = 
+                        Array.fold (fun (s:string,stuff:(KeywordType*(int*int)) list) (kt,r:Regex) -> 
+                            r.Matches(s) 
+                            |> Seq.cast<Match>
+                            |> Seq.fold(fun (acc:string,stuff:(KeywordType*(int*int)) list) (r:Match) ->
+                                let start = r.Index-1
+                                let stop = r.Index+r.Length
+                                (
+                                    (if start < 0 then "" else acc.[..r.Index-1]) +
+                                    String.replicate (r.Length-1) "\u0002" +
+                                    "\u0001" +
+                                    (if stop >= acc.Length then "" else acc.[stop..])
+                                ),(kt,dematch r)::stuff) (s,stuff)
+                            ) (s,pass2) r
+                    let pass4 = 
+                        let rec inner = function
+                            |i,n when i = s.Length -> n
+                            |i,n when i = s.Length - 1 -> if s.[i] = '\u0001' then n else (Normal,(i,1))::n
+                            |i,n ->
+                                if s.[i] = '\u0001' then inner(i+1,n)
+                                elif s.[i] = '\u0002' then let j = s.IndexOf('\u0001',i) in inner(j+1,n)
+                                else 
+                                    let j = s.IndexOfAny([|'\u0001';'\u0002'|],i)
+                                    if j = -1 then (Normal,(i,s.Length-i))::n
+                                    else let s' = s.[i..j-1] in inner(j,(Normal,(i,s'.Length))::n)
+                               
+                        inner(0,[])
+                    List.map(fun (kt,(i,l)) -> i,(kt,str.[i..i+l-1])) (pass3@pass4)
+                    |> List.sortBy fst
+                    |> List.map snd
+                }
+                    (*
+                    let findfirstnormal a = a |> Array.findIndex(function |Normal,_ -> true |_ -> false) |> (fun i -> let j = a.[i] in ,i)
+                    c 
+                    |> Array.Parallel.map (fun (r:Regex) -> 
+                        r.Matches(s) 
+                        |> Seq.cast<Match>
+                        |> Seq.fold(fun acc (r:Match) ->
+                            let v = findfirstnormal acc
+
+                        )
+                    ) 
+                    //|> Array.concat
                     //we replace all the tokens with 1, so that everything keeps its place
                     let noncomments = Array.fold(fun (acc:string) (r:Match) -> 
                         let start = r.Index-1
@@ -153,7 +221,7 @@ module Modules =
                     |> Array.map (fun (r,t) -> Array.map(fun (r:Match) -> t,s.[r.Index..r.Index+r.Length-1]) r)
                     |> Array.concat
                     // |> Array.groupBy snd
-                }
+                    *)
                     //let comments = Array.Parallel.map(fun (r:Regex) -> r.Matches(s)) |> Array.concat
                     //In pass 1, we remove any comments, and store them for later
 
