@@ -207,16 +207,20 @@ module IPC =
         static member ToByteArray(x) = List.fold(fun acc (elem:Part) -> elem.ToByteArray() :: acc) [] x.parts |> List.rev |> Array.concat
     open System.Net
     open System.Net.Sockets
-    type IPC(local:IPEndPoint,remote:IPEndPoint) = 
-        let socket = new UdpClient(local)
-        do socket.Connect(remote)
+    type IPC (socket:UdpClient) = 
+        //let socket = new UdpClient(local)
+        //do socket.Connect(remote)
+        new(local:IPEndPoint,remote:IPEndPoint) = let socket = new UdpClient(local) in socket.Connect(remote); new IPC(socket)
+        new(local:IPEndPoint)                   = let socket = new UdpClient(local) in new IPC(socket)
+        new()                                   = new IPC(new UdpClient())
         member x.Bind(ep:IPEndPoint) = socket.Client.Bind ep
+        member x.Connect(ep:IPEndPoint) = socket.Connect ep
         member x.LocalEndpoint = socket.Client.LocalEndPoint :?> IPEndPoint
         member x.RemoteEndpoint= socket.Client.RemoteEndPoint:?> IPEndPoint
         member x.Send(p:Packet) = let b = Packet.ToByteArray p in socket.Send(b,b.Length) |> ignore
         member x.Receive() = 
             //spinuntil(fun () -> socket.Available > 0) //poll the socket
-            let v = ref remote
+            let v = ref x.RemoteEndpoint
             socket.Receive(v)
             |> Packet.OfByteArray
 module Tree = 
