@@ -1,4 +1,4 @@
-﻿<Properties StartupItem="OmegaIDE.Page/OmegaIDE.Page.fsproj">
+﻿<Properties StartupItem="OmegaIDE.Backend.File/OmegaIDE.Backend.File.fsproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
   <MonoDevelop.Ide.Workbench ActiveDocument="OmegaIDE.Page/Program.fs">
     <Files>

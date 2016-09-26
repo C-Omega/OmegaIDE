@@ -1,9 +1,9 @@
-﻿module OmegaIDE.Page.AssemblyInfo
+﻿module OmegaIDE.Backend.File.AssemblyInfo
 
 open System.Reflection
 open System.Runtime.CompilerServices
 
-[<assembly:AssemblyTitle("OmegaIDE.Page")>]
+[<assembly:AssemblyTitle("OmegaIDE.Backend.File")>]
 [<assembly:AssemblyDescription("")>]
 [<assembly:AssemblyConfiguration("")>]
 [<assembly:AssemblyCompany("")>]
