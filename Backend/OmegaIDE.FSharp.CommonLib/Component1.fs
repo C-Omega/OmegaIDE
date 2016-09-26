@@ -14,6 +14,7 @@ module Core =
     //let remove_whitespace s = System.Text.RegularExpressions.Regex.Replace(s,"[ \n\t]","")
     let getgroups (c:Match) = c.Groups |> Seq.cast<Group> |> Seq.skip 1 |> Seq.map (fun (c:Group) -> c.Value)
     let regex s = Regex(s,RegexOptions.Singleline)
+    let regexremove r s = Regex.Replace(s,r,"",RegexOptions.Singleline)
 module ProjectFile = 
     type ProjectFileNode = 
         {location : string; language : string; platforms : string[]; buildmode:string}//checksum : byte[]}
@@ -223,6 +224,10 @@ module Tree =
         |Branch of 'Label * (LabelledTree<'Label,'a> list )
         |Leaf of 'Label * 'a
         static member GetLabel(x) = match x with |Branch(l,_)|Leaf(l,_) -> l
+        member x.Value = 
+            match x with
+            |Leaf(_,v) -> v
+            |_         -> failwith "Not a leaf"
         member x.Item i = 
             match x with
             |Branch(s,l) -> List.find(LabelledTree<'Label,'a>.GetLabel >> ((=) i)) l
@@ -233,27 +238,35 @@ module Config =
         {
             conf : LabelledTree<string,string> list
         }
-        static member OfString(s) =
+        member x.Item i = List.find(function |Branch(l,_) when l = i -> true |_ -> false) x.conf
+        override x.ToString() =
+            let rec inner i j = 
+                let v = String.replicate i "\t"
+                List.map (function 
+                    |Branch(l,t) -> String.concat "" [|v; "{;"; l; ";\n"; inner (i+1) t; "\n"; v; "};"|]
+                    |Leaf(a,b) -> v + "@" + a + "@" + b + ";"
+                ) j
+                |> String.concat "\n"
+            inner 0 x.conf
+        static member OfString(s:string) =
             //recursive regex
-            let rec inner s = 
+            let rec inner : string list * _ list -> string list * _ list = function
+                |[],acc -> [],acc
+                |a::n::l,acc when a.Contains("{") -> let a,b = inner(l,[]) in inner(a,Branch(n,b)::acc)
+                |a::l,acc when a.Contains("}")-> l,(List.rev acc)
+                |v::l,acc -> let j = regex(@"@(.*)@(.*)").Match(v)|> getgroups |> Array.ofSeq in inner(l,Leaf(j.[0],j.[1])::acc)
+            {conf = inner((regexremove @"\n|\r|\t|    " s).Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries)|>List.ofArray,[]) |> snd}
+                (* 
                 let branches = 
-                    regex(@"\{\((.*)\)(.*)\}").Matches(s)//\((.*)\)(.*)\
+                    regex(@"\{\((.* )\)(.* )\}").Matches(s)//\((.* )\)(.* )\
                     |> Seq.cast<Match> 
                     |> Seq.map (fun i -> let j = i |> getgroups |> Array.ofSeq in Branch(j.[0],inner j.[1])) 
                     |> List.ofSeq
                 let leaves = 
-                    regex(@"@(.*)@(.*);").Matches(s) 
+                    regex(@"@(.* )@(.* );").Matches(s) 
                     |> Seq.cast<Match> 
                     |> Seq.map (fun i -> let j = i|> getgroups |> Array.ofSeq in Leaf(j.[0],j.[1]))
                     |> List.ofSeq
                 leaves @ branches |> side (printfn "%A")
             {conf = inner s}
-        override x.ToString() =
-            let rec inner i j = 
-                let v = String.replicate i "\t"
-                List.map (function 
-                    |Branch(l,t) -> String.concat "" [|v; "{("; l; ")\n"; inner (i+1) t; "\n"; v; "}"|]
-                    |Leaf(a,b) -> v + "@" + a + "@" + b + ";"
-                ) j
-                |> String.concat "\n"
-            inner 0 x.conf
+        o*)
