@@ -2,6 +2,7 @@
 open C_Omega
 open C_Omega.ArraySliceImprovement
 open C_Omega.Helpers
+open System.Text.RegularExpressions
 [<AutoOpen>]
 module Core =
     let checksum (b:byte[]) = using (new System.Security.Cryptography.SHA512Managed()) (fun i -> i.ComputeHash b)
@@ -10,46 +11,45 @@ module Core =
     let utf8 = System.Text.Encoding.UTF8
     let tostring = utf8.GetString
     let ofstring(s:string) = utf8.GetBytes s
-    let remove_whitespace s = System.Text.RegularExpressions.Regex.Replace(s,"[ \n\t]","")
+    //let remove_whitespace s = System.Text.RegularExpressions.Regex.Replace(s,"[ \n\t]","")
+    let getgroups (c:Match) = c.Groups |> Seq.cast<Group> |> Seq.skip 1 |> Seq.map (fun (c:Group) -> c.Value)
+    let regex s = Regex(s,RegexOptions.Singleline)
+    let regexremove r s = Regex.Replace(s,r,"",RegexOptions.Singleline)
 module ProjectFile = 
     type ProjectFileNode = 
         {location : string; language : string; platforms : string[]; buildmode:string}//checksum : byte[]}
-        override x.ToString() = "@node@"+x.location+":"+x.language+"?"+String.concat "," x.platforms+"!"+x.buildmode //+"?"+(tobase64 x.checksum)
+        override x.ToString() = x.location+":"+x.language+"?"+String.concat "," x.platforms+"!"+x.buildmode //+"?"+(tobase64 x.checksum)
         //static member Checksum x = 
             //{location = x.location; language = x.language; checksum = "@"+x.location+":"+x.language |> ofstring |> checksum}
         static member OfString (s:string) = 
-            let i = s.IndexOf('@',1) // after @node@ tag
-            let a = s.LastIndexOf ":"
-            let b = s.LastIndexOf "?"
-            let c = s.LastIndexOf "!"
+            let m = regex(@"^(.*):(.*)\?(.*)!(.*)$").Match(s) |> getgroups |> Array.ofSeq
             {
-                location = s.[i+1..a-1];
-                language = s.[a+1..b-1];
-                platforms = s.[b+1..c-1].ToLower().Split([|','|],System.StringSplitOptions.RemoveEmptyEntries);
-                buildmode = s.ToLower().[c+1..];
+                location = m.[0];
+                language = m.[1];
+                platforms = m.[2].Split([|','|],System.StringSplitOptions.RemoveEmptyEntries);
+                buildmode = m.[3];
             }
     type ProjectFile = 
         {
             name : string
             nodes : ProjectFileNode[]
         }
-        override x.ToString() = "@name@"+x.name+";\n"+(Array.fold (fun acc elem -> acc + "\n" + string elem + ";") "" x.nodes)
+        override x.ToString() = "@name@"+x.name+";\n"+(Array.fold (fun acc elem -> acc + "\n@node@" + string elem + ";") "" x.nodes)
         static member OfString (s:string) = 
             //this removes any form of newline (CRLF or LF), and elimits it by semicolons
-            let s = System.Text.RegularExpressions.Regex.Replace(s,"[\r\n]","").Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
+            //let s = System.Text.RegularExpressions.Regex.Replace(s,"[\r\n]","").Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
+            let v = regex(@"@(.*)@(.*);").Matches(s) |> Seq.cast<Match> |> Seq.map (getgroups >> Array.ofSeq) |> List.ofSeq
             //a recursive parser
             let rec parse = function
                 |[],name,nodes -> name,nodes
-                |a::b,name,nodes -> 
-                    //get the type
-                    let x,y = (a:string).IndexOf '@', a.IndexOfAny([|'@';' '|],1)
-                    //get the value
-                    let z = a.[a.IndexOf('@',1)+1..]
-                    match a.[x+1..y-1].ToLower() with
-                    |"name" -> parse(b,z,nodes)
-                    |"node" -> parse(b,name,ProjectFileNode.OfString z :: nodes)
+                |(a:string[])::b,name,nodes -> 
+                    //get the type and the value
+                    let x,y = a.[0],a.[1]
+                    match x with
+                    |"name" -> parse(b,y,nodes)
+                    |"node" -> parse(b,name,ProjectFileNode.OfString y :: nodes)
                     |s -> raise (System.ArgumentException(s))
-            let name,nodes = parse (s,"",[])
+            let name,nodes = parse (v,"",[])
             {name = name; nodes = Array.ofList nodes}
 module Graphics = 
     type RGBA = 
@@ -67,7 +67,6 @@ module Graphics =
         static member White = {red=255uy;green=255uy;blue=255uy;alpha=0uy}
         static member (+) (a:RGBA,b) = {red = (a.red+b.red)/2uy;green = (a.green+b.green)/2uy;blue = (a.blue+b.blue)/2uy;alpha = (a.alpha+b.alpha)/2uy}
 module Modules =
-    open System.Text.RegularExpressions
     open Graphics
     [<System.FlagsAttribute>]
     type Style = 
@@ -90,7 +89,7 @@ module Modules =
         type SyntaxHighlighter = 
             {update : string -> (KeywordType * string)list}
             static member OfString(s:string) =
-                let s = System.Text.RegularExpressions.Regex.Replace(s,"[\r\n]","").Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
+                //let s = regex(s,"[\r\n]","").Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
                 let rec parse = function
                     |[],c -> c
                     |a::b,c -> 
@@ -98,7 +97,7 @@ module Modules =
                         let x,y = (a:string).IndexOf '@', a.IndexOfAny([|'@';' '|],1)
                         let i = a.IndexOf('@',1)
                         //get the value
-                        let z = Regex(a.[i+1..])
+                        let z = regex(a.[i+1..])
                         match a.[x+1..y-1].ToLower() with
                         |"majorkeyword" ->  parse(b,(MajorKeyword, z) :: c)
                         |"minorkeyword" ->  parse(b,(MinorKeyword, z) :: c)
@@ -106,7 +105,7 @@ module Modules =
                         |"literalstring" -> parse(b,(LiteralString, z) :: c)
                         |"comment" ->       parse(b,(Comment, z) :: c)
                         |s -> raise (System.ArgumentException(s))
-                let t = parse(s,[]) |> Array.ofList
+                let t = parse(s.Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray,[]) |> Array.ofList
                 let c = Array.Parallel.choose (function |Comment, r -> Some r |_ -> None) t
                 let l = Array.Parallel.choose (function |Literal, r -> Some r |_ -> None) t
                 let r = Array.Parallel.choose (function |Comment,_ |Literal, _ -> None |a,b -> Some(a,b)) t
@@ -171,77 +170,103 @@ module Modules =
                     |> List.sortBy fst
                     |> List.map snd
                 }
-                    (*
-                    let findfirstnormal a = a |> Array.findIndex(function |Normal,_ -> true |_ -> false) |> (fun i -> let j = a.[i] in ,i)
-                    c 
-                    |> Array.Parallel.map (fun (r:Regex) -> 
-                        r.Matches(s) 
-                        |> Seq.cast<Match>
-                        |> Seq.fold(fun acc (r:Match) ->
-                            let v = findfirstnormal acc
-
-                        )
-                    ) 
-                    //|> Array.concat
-                    //we replace all the tokens with 1, so that everything keeps its place
-                    let noncomments = Array.fold(fun (acc:string) (r:Match) -> 
-                        let start = r.Index-1
-                        let stop = r.Index+r.Length
-                        (if start < 0 then "" else acc.[..r.Index-1]) + "\u0001" + String.replicate (r.Length-1) "\u0002" + (if stop >= acc.Length then "" else acc.[stop..])) s comments
-                    let literals = 
-                        l 
-                        |> Array.Parallel.map (fun (r:Regex) -> r.Matches(noncomments) |> Seq.cast<Match> |> Array.ofSeq)
-                        |> Array.concat
-                    let rest = Array.fold(fun (acc:string) (r:Match) -> acc.[..r.Index-1] + String.replicate r.Length "\u0003" + acc.[r.Index+r.Length..]) noncomments literals
-                    let final = Array.Parallel.map (fun (t,r:Regex) -> (r.Matches(rest) |> Seq.cast<Match> |> Array.ofSeq),t) r
-                    let x,y = 
-                        Array.append [|comments,Comment;literals,Literal|] (final)
-                        |> Array.Parallel.map (fun (i,j) -> Array.Parallel.map(fun k -> k,j) i)
-                        |> Array.concat
-                        |> Array.fold(fun (i:_ list,acc:string) (r:Match,k:KeywordType) -> 
-                            let start = r.Index-1
-                            let stop = r.Index+r.Length
-                            //r.Index::i,((if start < 0 then "" else acc.[..r.Index-1]) + String.replicate r.Length "\u0001" + (if stop >= acc.Length then "" else acc.[stop..]))
-                            (r, acc.[r.Index..stop-1])::i,
-                            ((if start < 0 then "" else acc.[..r.Index-1]) + "\u0001" + String.replicate r.Length "\u0004" + (if stop >= acc.Length then "" else acc.[stop..]))
-                        ) ([],s)
-                        |> function |i,j -> List.rev i,j
-                    let replace (s:string) p (a:string) = s.[..p] + a + s.[p+a.Length-1..]
-                    let normal = 
-                        let m = y.Split('\u0002') |> List.ofArray
-                        let rec inner = function
-                            |[],[],tokens -> List.rev tokens
-                            |[],finals,_ -> failwith "You have messed up, Harlan"
-                            |focus::stringparts,finals,tokens ->
-                                if focus = "" || focus.[0] = '\u0001' then inner(stringparts,finals.Tail,finals.Head::tokens) //you have picked up a final token
-                                else inner(stringparts,finals,(focus,Normal)::tokens)
-                        inner(m,x,[])
-                    //nonfinal
-                    Array.append [|comments,Comment;literals,LiteralString|] final
-                    |> Array.map (fun (r,t) -> Array.map(fun (r:Match) -> t,s.[r.Index..r.Index+r.Length-1]) r)
-                    |> Array.concat
-                    // |> Array.groupBy snd
-                    *)
-                    //let comments = Array.Parallel.map(fun (r:Regex) -> r.Matches(s)) |> Array.concat
-                    //In pass 1, we remove any comments, and store them for later
-
-                    (*
-                            match List.tryFind(fun (a,_) -> v.StartsWith(a)) with
-                            |None -> pass1(comments,v.[1..])
-                            |Some(a,b) -> 
-                                let j = v.IndexOf(b)
-                                if j = -1 then None else
-                                pass1((v.[..v],i,j)::comments)
-                    //In pass 2, we remove any string literals
-                    let rec pass2 = function
-                        |lits,_,"" -> Some lits //return when the char list is empty
-                        |comments,i,v ->
-                            match List.tryFind(fun (a,_) -> v.StartsWith(a)) with
-                            |None -> pass1(comments,v.[1..])
-                            |Some(a,b) -> 
-                                let j = v.IndexOf(b)
-                                if j = -1 then None else
-                                pass1((v.[..v],i,j)::lits)
-                    //With the comments and string literals out, we can highlight the important parts
-
-                    ()*)
+type PartType = 
+    |Bytes      = 0uy
+    |String     = 1uy
+    |KeyValue   = 2uy
+type Part = 
+    |Bytes      of byte[]
+    |String     of string
+    |KeyValue   of string * string
+    static member OfByteArray(b:byte[]) = 
+        match b.[0] |> enum with
+        |PartType.Bytes    -> let i = _b_int32 b.[1..4] in Bytes(b.[5..i+4]),i+5
+        |PartType.String   -> let i = Array.findIndex ((=) 0uy) b in String(tostring b.[1..i-1]),i+1
+        |PartType.KeyValue -> 
+            let i = Array.findIndex ((=) 0uy) b
+            let j = Array.findIndex ((=) 0uy) b.[i+1..] + (i+1)
+            KeyValue(tostring b.[1..i-1],tostring b.[i+1..j-1]),j+1
+        |i                       -> failwithf "Bad part type %x" (deEnum i)
+    member x.ToByteArray() = 
+            match x with
+            |Bytes      b   -> Array.concat [|[|deEnum PartType.Bytes|];_int32_b b.Length;b|]
+            |String     s   -> Array.concat [|[|deEnum PartType.String|];s |> ofstring;[|0uy|]|]
+            |KeyValue (a,b) -> Array.concat [|[|deEnum PartType.KeyValue|];ofstring a;[|0uy|];ofstring b;[|0uy|]|]
+module IPC = 
+    type Packet = 
+        {
+            parts : Part list
+        }
+        static member OfByteArray(b:byte[]) = 
+            {parts = 
+                List.unfold (function
+                    |[||] -> None
+                    |arr  -> let p,i = Part.OfByteArray(arr) in Some(p,arr.[i..])
+                    ) b
+            }
+        static member ToByteArray(x) = List.fold(fun acc (elem:Part) -> elem.ToByteArray() :: acc) [] x.parts |> List.rev |> Array.concat
+    open System.Net
+    open System.Net.Sockets
+    type IPC(local:IPEndPoint,remote:IPEndPoint) = 
+        let socket = new UdpClient(local)
+        do socket.Connect(remote)
+        member x.Bind(ep:IPEndPoint) = socket.Client.Bind ep
+        member x.LocalEndpoint = socket.Client.LocalEndPoint :?> IPEndPoint
+        member x.RemoteEndpoint= socket.Client.RemoteEndPoint:?> IPEndPoint
+        member x.Send(p:Packet) = let b = Packet.ToByteArray p in socket.Send(b,b.Length) |> ignore
+        member x.Receive() = 
+            //spinuntil(fun () -> socket.Available > 0) //poll the socket
+            let v = ref remote
+            socket.Receive(v)
+            |> Packet.OfByteArray
+module Tree = 
+    type LabelledTree<'Label,'a when 'Label : equality> = 
+        |Branch of 'Label * (LabelledTree<'Label,'a> list )
+        |Leaf of 'Label * 'a
+        static member GetLabel(x) = match x with |Branch(l,_)|Leaf(l,_) -> l
+        member x.Value = 
+            match x with
+            |Leaf(_,v) -> v
+            |_         -> failwith "Not a leaf"
+        member x.Item i = 
+            match x with
+            |Branch(s,l) -> List.find(LabelledTree<'Label,'a>.GetLabel >> ((=) i)) l
+            |_           -> failwith "Not a branch"
+module Config =
+    open Tree
+    type Config = 
+        {
+            conf : LabelledTree<string,string> list
+        }
+        member x.Item i = List.find(function |Branch(l,_) when l = i -> true |_ -> false) x.conf
+        override x.ToString() =
+            let rec inner i j = 
+                let v = String.replicate i "\t"
+                List.map (function 
+                    |Branch(l,t) -> String.concat "" [|v; "{;"; l; ";\n"; inner (i+1) t; "\n"; v; "};"|]
+                    |Leaf(a,b) -> v + "@" + a + "@" + b + ";"
+                ) j
+                |> String.concat "\n"
+            inner 0 x.conf
+        static member OfString(s:string) =
+            //recursive regex
+            let rec inner : string list * _ list -> string list * _ list = function
+                |[],acc -> [],acc
+                |a::n::l,acc when a.Contains("{") -> let a,b = inner(l,[]) in inner(a,Branch(n,b)::acc)
+                |a::l,acc when a.Contains("}")-> l,(List.rev acc)
+                |v::l,acc -> let j = regex(@"@(.*)@(.*)").Match(v)|> getgroups |> Array.ofSeq in inner(l,Leaf(j.[0],j.[1])::acc)
+            {conf = inner((regexremove @"\n|\r|\t|    " s).Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries)|>List.ofArray,[]) |> snd}
+                (* 
+                let branches = 
+                    regex(@"\{\((.* )\)(.* )\}").Matches(s)//\((.* )\)(.* )\
+                    |> Seq.cast<Match> 
+                    |> Seq.map (fun i -> let j = i |> getgroups |> Array.ofSeq in Branch(j.[0],inner j.[1])) 
+                    |> List.ofSeq
+                let leaves = 
+                    regex(@"@(.* )@(.* );").Matches(s) 
+                    |> Seq.cast<Match> 
+                    |> Seq.map (fun i -> let j = i|> getgroups |> Array.ofSeq in Leaf(j.[0],j.[1]))
+                    |> List.ofSeq
+                leaves @ branches |> side (printfn "%A")
+            {conf = inner s}
+        o*)
