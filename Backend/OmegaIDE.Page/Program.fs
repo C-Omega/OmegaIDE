@@ -14,22 +14,17 @@ let a = ep loopbackv4 9011
 let b = ep loopbackv4 9012
 [<EntryPoint>]
 let main argv = 
-    {conf = [Branch("branch",[Leaf("leaf","value")])]} |> side (printfn "%A") |> string |> side (printfn "%A") |> Config.OfString |> printfn "%A"
-    (*
+    //{conf = [Branch("branch1",[Leaf("leaf1","value");Leaf("leaf2","value");Branch("branch2",[])])]} 
+    //|> side (printfn "%A") |> string |> side (printfn "%A") |> Config.OfString |> printfn "%A"
     let ipc = IPC(ep (ip argv.[0]) 0, ep (ip argv.[0]) (int argv.[1]))
-    let config = File.ReadAllText argv.[2]
-    while true do 
-        match ipc.Receive() with
-        |{parts = String "load"::String what::String path::[]} ->
-            match what with
-            |"project" -> 
-
-            |"highlighter" -> SyntaxHighlighter.OfString
-
-    ipc1.Send  {parts = [Bytes[|0uy|];String "hi";KeyValue("foo","bar")]}
-    //let v = "@comment@\(\*.*\*\);\n@comment@//.*\\n" |> Modules.Highlighting.SyntaxHighlighter.OfString
-    //v.update "normal(*comment*)\n//comment 2\n" |> printfn %A
-    ipc2.Receive() |> printfn %A
-    *)
+    let mutable config = File.ReadAllText argv.[2] |> Config.OfString
+    match ipc.Receive() with
+    |{parts = String "load"::String what::String path::[]} as p ->
+        match what with
+        |"project" -> {parts = [String "got"; String "project"; String path; String <| File.ReadAllText(path)]}
+        |"highlighter" -> {parts = [String "got"; String "project"; String path; String <| File.ReadAllText(config.["default paths"].["highlighter"].Value + path)]}
+        |s             -> {parts = [String "error"; String "unknown command"] @ p.parts}
+        |> ipc.Send
+    |{parts = String "reload" :: String "config" :: []} -> config <- File.ReadAllText argv.[2] |> Config.OfString;
     0 // return an integer exit code
 
