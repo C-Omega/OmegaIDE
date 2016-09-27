@@ -1,0 +1,5 @@
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/obj/x86/Debug/.NETFramework,Version=v4.6.1.AssemblyAttribute.fs
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/OmegaIDE.Backend.Compiler.exe.mdb
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/OmegaIDE.Backend.Compiler.exe
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/obj/x86/Debug/OmegaIDE.Backend.Compiler.exe
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/obj/x86/Debug/OmegaIDE.Backend.Compiler.exe.mdb

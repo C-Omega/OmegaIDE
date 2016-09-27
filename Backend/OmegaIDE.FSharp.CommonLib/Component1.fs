@@ -16,6 +16,10 @@ module Core =
     let regex s = Regex(s,RegexOptions.Singleline)
     let regexremove r s = Regex.Replace(s,r,"",RegexOptions.Singleline)
     let udpv4() = new System.Net.Sockets.Socket(System.Net.Sockets.AddressFamily.InterNetwork,System.Net.Sockets.SocketType.Dgram,System.Net.Sockets.ProtocolType.Udp)
+module KVFile =
+    type KVFile = 
+        {nodes : (string * string) list}
+
 module ProjectFile = 
     type ProjectFileNode = 
         {location : string; language : string; platforms : string[]; buildmode:string}//checksum : byte[]}
@@ -280,3 +284,4 @@ module Config =
                 leaves @ branches |> side (printfn "%A")
             {conf = inner s}
         o*)
+module Compilers =
