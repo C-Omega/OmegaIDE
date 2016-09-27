@@ -7,6 +7,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>OmegaIDE.FSharp.CommonLib</RootNamespace>
     <AssemblyName>OmegaIDE.FSharp.CommonLib</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,11 +21,21 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
+    <Reference Include="mscorlib">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.Core">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Numerics">
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
@@ -36,7 +47,6 @@
     <ProjectReference Include="..\Core\Core.fsproj">
       <Project>{D5136B1A-4B66-4905-B248-8805E22A018D}</Project>
       <Name>Core</Name>
-      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
 </Project>

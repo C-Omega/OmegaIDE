@@ -17,14 +17,15 @@ let main argv =
     let ipc = IPC(ep anyv4 0, ep (ip argv.[0]) (int argv.[1]))
     ipc.Send {parts = [String "bound to"; Bytes(_int32_b ipc.LocalEndpoint.Port)]}
     let mutable config = File.ReadAllText argv.[2] |> Config.OfString
+    printfn "Config: \n %O" config
     try
         match ipc.Receive() with
         |{parts = String "get"::String what::String path::[]} as p ->
             match what with
             |"project"      -> {parts = [String "got"; String "project"    ; String path; String <| File.ReadAllText(path)]}
             |"highlighter"  -> {parts = [String "got"; String "highlighter"; String path; String <| File.ReadAllText(config.["default paths"].["highlighter"].Value + path)]}
-            |"config"       -> {parts = [String "gor"; String "config"     ; String path; String <| config.ToString()]}
-            |s             -> {parts = [String "error"; String "unknown command"] @ p.parts}
+            |"config"       -> {parts = [String "got"; String "config"     ; String path; String <| config.ToString()]}
+            |s              -> {parts = [String "error"; String "unknown command"] @ p.parts}
             |> ipc.Send
         |{parts = String "reload" :: String "config" :: []} -> config <- File.ReadAllText argv.[2] |> Config.OfString;
         |e -> failwithf "Didn't match: %A" e

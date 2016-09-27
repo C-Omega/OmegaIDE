@@ -1,0 +1,9 @@
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/obj/x86/Release/.NETFramework,Version=v4.0.AssemblyAttribute.fs
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/OmegaIDE.Backend.Core.exe
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/obj/x86/Release/OmegaIDE.Backend.Core.exe
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/mscorlib.dll
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/FSharp.Core.dll
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/System.dll
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/System.Numerics.dll
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/Core.dll
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/OmegaIDE.FSharp.CommonLib.dll
