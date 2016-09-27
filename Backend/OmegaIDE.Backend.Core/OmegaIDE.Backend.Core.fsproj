@@ -7,6 +7,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>OmegaIDE.Backend.Core</RootNamespace>
     <AssemblyName>OmegaIDE.Backend.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,21 +21,11 @@
     <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="mscorlib">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharp.Core">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Core">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Numerics">
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
@@ -46,13 +37,24 @@
       <Project>{D5136B1A-4B66-4905-B248-8805E22A018D}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OmegaIDE.FSharp.CommonLib\OmegaIDE.FSharp.CommonLib.fsproj">
-      <Project>{1E34C246-8574-436D-B056-B08B4E53B8E9}</Project>
-      <Name>OmegaIDE.FSharp.CommonLib</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OmegaIDE.Backend.File\OmegaIDE.Backend.File.fsproj">
       <Project>{D26D2C32-06BE-4ED1-8920-ED266F94D33A}</Project>
       <Name>OmegaIDE.Backend.File</Name>
     </ProjectReference>
+    <ProjectReference Include="..\OmegaIDE.FSharp.CommonLib\OmegaIDE.FSharp.CommonLib.fsproj">
+      <Project>{1E34C246-8574-436D-B056-B08B4E53B8E9}</Project>
+      <Name>OmegaIDE.FSharp.CommonLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="fsharp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="python">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

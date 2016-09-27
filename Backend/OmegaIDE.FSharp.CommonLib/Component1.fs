@@ -15,6 +15,7 @@ module Core =
     let getgroups (c:Match) = c.Groups |> Seq.cast<Group> |> Seq.skip 1 |> Seq.map (fun (c:Group) -> c.Value)
     let regex s = Regex(s,RegexOptions.Singleline)
     let regexremove r s = Regex.Replace(s,r,"",RegexOptions.Singleline)
+    let udpv4() = new System.Net.Sockets.Socket(System.Net.Sockets.AddressFamily.InterNetwork,System.Net.Sockets.SocketType.Dgram,System.Net.Sockets.ProtocolType.Udp)
 module ProjectFile = 
     type ProjectFileNode = 
         {location : string; language : string; platforms : string[]; buildmode:string}//checksum : byte[]}
@@ -83,6 +84,7 @@ module Modules =
         |LiteralString
         |Comment
         |Preprocessor//   =   5uy
+        |Type
     type DescribedString = {s:string; style : Style; keywordtype : KeywordType}
     type GraphicString   = {s:string; foreground : RGBA; background : RGBA; style : Style}
     module Highlighting =
@@ -94,21 +96,24 @@ module Modules =
                     |[],c -> c
                     |a::b,c -> 
                         //get the type
-                        let x,y = (a:string).IndexOf '@', a.IndexOfAny([|'@';' '|],1)
-                        let i = a.IndexOf('@',1)
+                        let x = (a:string).IndexOf '@'
+                        let y = a.IndexOf('@',x+1)
+                        printfn "%A" (x,y)
                         //get the value
-                        let z = regex(a.[i+1..])
+                        let z = regex(a.[y+1..])
                         match a.[x+1..y-1].ToLower() with
                         |"majorkeyword" ->  parse(b,(MajorKeyword, z) :: c)
                         |"minorkeyword" ->  parse(b,(MinorKeyword, z) :: c)
                         |"literal" ->       parse(b,(Literal, z) :: c)
                         |"literalstring" -> parse(b,(LiteralString, z) :: c)
                         |"comment" ->       parse(b,(Comment, z) :: c)
+                        |"type"          -> parse(b,(Type, z) :: c)
+                        |""              -> parse(b,c)
                         |s -> raise (System.ArgumentException(s))
                 let t = parse(s.Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray,[]) |> Array.ofList
                 let c = Array.Parallel.choose (function |Comment, r -> Some r |_ -> None) t
-                let l = Array.Parallel.choose (function |Literal, r -> Some r |_ -> None) t
-                let r = Array.Parallel.choose (function |Comment,_ |Literal, _ -> None |a,b -> Some(a,b)) t
+                let l = Array.Parallel.choose (function |LiteralString, r -> Some r |_ -> None) t
+                let r = Array.Parallel.choose (function |Comment,_ -> None |a,b -> Some(a,b)) t
                 let dematch(a:Match) = a.Index,a.Length
                 {update = fun str -> 
                     let s,pass1 = 
@@ -147,7 +152,7 @@ module Modules =
                                 let start = r.Index-1
                                 let stop = r.Index+r.Length
                                 (
-                                    (if start < 0 then "" else acc.[..r.Index-1]) +
+                                    (if start < 0 then "" else acc.[..start]) +
                                     String.replicate (r.Length-1) "\u0002" +
                                     "\u0001" +
                                     (if stop >= acc.Length then "" else acc.[stop..])
@@ -216,14 +221,14 @@ module IPC =
         member x.RemoteEndpoint= socket.RemoteEndPoint:?> IPEndPoint
         member x.Send(p:Packet) = let b = Packet.ToByteArray p in socket.Send(b) |> ignore
         member x.Receive() = 
-            //spinuntil(fun () -> socket.Available > 0) //poll the socket
+            spinuntil(fun () -> socket.Available > 0) //poll the socket
             //let v = ref x.RemoteEndpoint
             let b = Array.zeroCreate<byte> socket.Available
             b.[..socket.Receive(b)-1]
             |> Packet.OfByteArray
         new(local:IPEndPoint,remote:IPEndPoint) as x = new IPC(local) then x.Connect remote
-        new(local:IPEndPoint) as x                   = new IPC() then x.Bind local
-        new()                                        = new IPC(new Socket(AddressFamily.InterNetwork,SocketType.Dgram,ProtocolType.Udp))
+        new(local:IPEndPoint)                   as x = new IPC(udpv4()) then x.Bind local
+        new()                                        = new IPC(ep anyv4 0)
 module Tree = 
     type LabelledTree<'Label,'a when 'Label : equality> = 
         |Branch of 'Label * (LabelledTree<'Label,'a> list )

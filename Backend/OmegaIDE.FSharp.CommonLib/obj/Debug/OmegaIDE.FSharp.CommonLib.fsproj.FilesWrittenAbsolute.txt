@@ -1,5 +1,11 @@
-/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/obj/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.fs
+/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.fs
 /home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/bin/Debug/OmegaIDE.FSharp.CommonLib.dll.mdb
 /home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/bin/Debug/OmegaIDE.FSharp.CommonLib.dll
 /home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/obj/Debug/OmegaIDE.FSharp.CommonLib.dll
 /home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/obj/Debug/OmegaIDE.FSharp.CommonLib.dll.mdb
+/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/bin/Debug/mscorlib.dll
+/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/bin/Debug/FSharp.Core.dll
+/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/bin/Debug/System.dll
+/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/bin/Debug/System.Numerics.dll
+/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/bin/Debug/Core.dll
+/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/bin/Debug/Core.dll.mdb

@@ -1,0 +1,3 @@
+/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/obj/Release/.NETFramework,Version=v4.0.AssemblyAttribute.fs
+/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/bin/Release/OmegaIDE.FSharp.CommonLib.dll
+/home/harlan/IDE/Backend/OmegaIDE.FSharp.CommonLib/obj/Release/OmegaIDE.FSharp.CommonLib.dll
