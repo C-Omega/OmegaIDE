@@ -14,9 +14,9 @@ open System.IO
 let main argv = 
     //{conf = [Branch("branch1",[Leaf("leaf1","value");Leaf("leaf2","value");Branch("branch2",[])])]} 
     //|> side (printfn "%A") |> string |> side (printfn "%A") |> Config.OfString |> printfn "%A"
-    let ipc = IPC(ep (ip argv.[0]) 0, ep (ip argv.[1]) (int argv.[2]))
+    let ipc = IPC(ep anyv4 0, ep (ip argv.[0]) (int argv.[1]))
     ipc.Send {parts = [String "bound to"; Bytes(_int32_b ipc.LocalEndpoint.Port)]}
-    let mutable config = File.ReadAllText argv.[3] |> Config.OfString
+    let mutable config = File.ReadAllText argv.[2] |> Config.OfString
     try
         match ipc.Receive() with
         |{parts = String "get"::String what::String path::[]} as p ->

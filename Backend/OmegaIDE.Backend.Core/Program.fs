@@ -7,9 +7,9 @@ open OmegaIDE.FSharp
 open OmegaIDE.FSharp.IPC
 [<EntryPoint>]
 let main argv = 
-    let file = IPC(ep loopbackv4 0,ep loopbackv4 0)
-    let f = System.Diagnostics.Process.Start(argv.[0],
-    file.LocalEndpoint,file.RemoteEndpoint |> printfn "%A"
+    let file = IPC(ep anyv4 0)
+    let f = System.Diagnostics.Process.Start("OmegaIDE.Backend.File.exe",String.concat " "[|string file.LocalEndpoint.Address;string file.LocalEndpoint.Port; argv.[0]|])
+
     printfn "%A" argv
     0 // return an integer exit code
 

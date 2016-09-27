@@ -207,22 +207,23 @@ module IPC =
         static member ToByteArray(x) = List.fold(fun acc (elem:Part) -> elem.ToByteArray() :: acc) [] x.parts |> List.rev |> Array.concat
     open System.Net
     open System.Net.Sockets
-    type IPC (socket:UdpClient) = 
+    type IPC (socket:Socket) = 
         //let socket = new UdpClient(local)
         //do socket.Connect(remote)
-        new(local:IPEndPoint,remote:IPEndPoint) = let socket = new UdpClient(local) in socket.Connect(remote); new IPC(socket)
-        new(local:IPEndPoint)                   = let socket = new UdpClient(local) in new IPC(socket)
-        new()                                   = new IPC(new UdpClient())
-        member x.Bind(ep:IPEndPoint) = socket.Client.Bind ep
+        member x.Bind(ep:IPEndPoint) = socket.Bind ep
         member x.Connect(ep:IPEndPoint) = socket.Connect ep
-        member x.LocalEndpoint = socket.Client.LocalEndPoint :?> IPEndPoint
-        member x.RemoteEndpoint= socket.Client.RemoteEndPoint:?> IPEndPoint
-        member x.Send(p:Packet) = let b = Packet.ToByteArray p in socket.Send(b,b.Length) |> ignore
+        member x.LocalEndpoint = socket.LocalEndPoint :?> IPEndPoint
+        member x.RemoteEndpoint= socket.RemoteEndPoint:?> IPEndPoint
+        member x.Send(p:Packet) = let b = Packet.ToByteArray p in socket.Send(b) |> ignore
         member x.Receive() = 
             //spinuntil(fun () -> socket.Available > 0) //poll the socket
-            let v = ref x.RemoteEndpoint
-            socket.Receive(v)
+            //let v = ref x.RemoteEndpoint
+            let b = Array.zeroCreate<byte> socket.Available
+            b.[..socket.Receive(b)-1]
             |> Packet.OfByteArray
+        new(local:IPEndPoint,remote:IPEndPoint) as x = new IPC(local) then x.Connect remote
+        new(local:IPEndPoint) as x                   = new IPC() then x.Bind local
+        new()                                        = new IPC(new Socket(AddressFamily.InterNetwork,SocketType.Dgram,ProtocolType.Udp))
 module Tree = 
     type LabelledTree<'Label,'a when 'Label : equality> = 
         |Branch of 'Label * (LabelledTree<'Label,'a> list )
