@@ -36,6 +36,7 @@
     <ProjectReference Include="..\Core\Core.fsproj">
       <Project>{D5136B1A-4B66-4905-B248-8805E22A018D}</Project>
       <Name>Core</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
 </Project>
