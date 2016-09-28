@@ -19,7 +19,20 @@ module Core =
 module KVFile =
     type KVFile = 
         {nodes : (string * string) list}
-
+        override x.ToString() = List.fold(fun acc (key,value) -> acc+"@"+key+"@"+value+";\n") "" x.nodes
+        static member OfString (s:string) = 
+            //this removes any form of newline (CRLF or LF), and elimits it by semicolons
+            //let s = System.Text.RegularExpressions.Regex.Replace(s,"[\r\n]","").Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
+            let v = regex(@"@(.*)@(.*);").Matches(s) |> Seq.cast<Match> |> Seq.map (getgroups >> Array.ofSeq) |> List.ofSeq
+            //a recursive parser
+            let rec parse = function
+                |[]             ,nodes -> nodes
+                |(a:string[])::b,nodes -> 
+                    //get the type and the value
+                    let x,y = a.[0],a.[1]
+                    parse(b,(x,y)::nodes)
+            let nodes = parse (v,[])
+            {nodes = nodes}
 module ProjectFile = 
     type ProjectFileNode = 
         {location : string; language : string; platforms : string[]; buildmode:string}//checksum : byte[]}
