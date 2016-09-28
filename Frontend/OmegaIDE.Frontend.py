@@ -105,9 +105,8 @@ class App(QtGui.QMainWindow):
         pass
 
     def open_file(self):
-
-        if self.file == "":
-            self.file = QtGui.QFileDialog.getOpenFileName(self, "Open", ".", "")
+        print("Open")
+        self.file = QtGui.QFileDialog.getOpenFileName(self, "Open", ".", "")
 
         with open(self.file, "rt") as file:
             self.text.setText(file.read())
