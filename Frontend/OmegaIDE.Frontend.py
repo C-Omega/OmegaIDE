@@ -1,6 +1,9 @@
 import sys
+from editor import Editor
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt
+from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython
+
+
 
 class App(QtGui.QMainWindow):
 
@@ -15,7 +18,8 @@ class App(QtGui.QMainWindow):
         self.setGeometry(0,0,self.width,self.height)
 
         self.setWindowTitle("OmegaIDE")
-        self.text = QtGui.QTextEdit(self)
+        self.text = Editor()#QtGui.QTextEdit(self)
+        self.text.cursorPositionChanged.connect(self.show_cursor_pos)
 
         self.setCentralWidget(self.text)
 
@@ -76,6 +80,8 @@ class App(QtGui.QMainWindow):
         self.new_project_action.setShortcut("Ctrl+Shift+P")
         self.new_project_action.triggered.connect(self.new_project)
 
+       
+
 
         self.main_toolbar = self.addToolBar("Options")
         self.main_toolbar.setStyleSheet('QToolBar{spacing:5px;}')
@@ -93,7 +99,7 @@ class App(QtGui.QMainWindow):
             self.file = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
 
         with open(self.file,"wt") as file:
-            file.write(self.text.toPlainText())
+            file.write(self.text)#toPlainText())
 
     def make_new_file(self):
         pass
@@ -106,6 +112,8 @@ class App(QtGui.QMainWindow):
         with open(self.file, "rt") as file:
             self.text.setText(file.read())
 
+        self.text
+
     def open_project(self):
         print("Project Opened")
 
@@ -114,6 +122,15 @@ class App(QtGui.QMainWindow):
 
     def init_file_manager(self):
         self.file = ""
+
+    def show_cursor_pos(self):
+        pass
+        # c = self.text.textCursor()
+
+        # line = c.blockNumber() + 1 #MERE MORTALS LIKE THEIR LINES TO BEGIN AT 1
+        # col = c.columnNumber() + 1 #MERE MORTALS LIKE THEIR COLS TO BEGIN AT 1
+
+        # self.status_bar.showMessage("{}::{}".format(line,col))
 
 def main():
 
