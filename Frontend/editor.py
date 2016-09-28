@@ -7,3 +7,6 @@ class Editor(Qsci.QsciScintilla):
 		Qsci.QsciScintilla.__init__(self)
 		lexer = Qsci.QsciLexerPython(self)
 		self.setLexer(lexer)
+	
+	def get_plain_text(self):
+		return self.text()
