@@ -30,6 +30,9 @@ class App(QtGui.QMainWindow):
         self.init_menubar()
 
         self.status_bar = self.statusBar()
+        self.status_bar_text = QtGui.QLabel()
+        self.status_bar_text.setText("")
+        self.status_bar.addWidget(self.status_bar_text)
 
     def init_formatbar(self):
 
@@ -129,8 +132,8 @@ class App(QtGui.QMainWindow):
 
         line = c[0] + 1 #MERE MORTALS LIKE THEIR LINES TO BEGIN AT 1
         col = c[1] + 1 #MERE MORTALS LIKE THEIR COLS TO BEGIN AT 1
-
-        self.status_bar.showMessage("{}::{}".format(line,col))
+        
+        self.status_bar_text.setText("{}::{}".format(line,col))
 
 def main():
 
