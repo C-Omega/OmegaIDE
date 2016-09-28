@@ -18,7 +18,7 @@ class App(QtGui.QMainWindow):
         self.setGeometry(0,0,self.width,self.height)
 
         self.setWindowTitle("OmegaIDE")
-        self.text = Editor()#QtGui.QTextEdit(self)
+        self.text = Editor()
         self.text.cursorPositionChanged.connect(self.show_cursor_pos)
 
         self.setCentralWidget(self.text)
@@ -99,7 +99,7 @@ class App(QtGui.QMainWindow):
             self.file = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
 
         with open(self.file,"wt") as file:
-            file.write(self.text)#toPlainText())
+            file.write(self.text.get_plain_text())#toPlainText())
 
     def make_new_file(self):
         pass
