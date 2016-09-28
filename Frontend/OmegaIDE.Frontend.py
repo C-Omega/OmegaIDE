@@ -1,7 +1,7 @@
 import sys
 from editor import Editor
-from PyQt4 import QtGui, QtCore
-from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython
+from PyQt4 import QtGui, QtCore, Qsci
+
 
 
 
@@ -18,7 +18,7 @@ class App(QtGui.QMainWindow):
         self.setGeometry(0,0,self.width,self.height)
 
         self.setWindowTitle("OmegaIDE")
-        self.text = Editor()
+        self.text = Editor(Qsci.QsciLexerPython(self))
         self.text.cursorPositionChanged.connect(self.show_cursor_pos)
 
         self.setCentralWidget(self.text)
@@ -123,13 +123,14 @@ class App(QtGui.QMainWindow):
         self.file = ""
 
     def show_cursor_pos(self):
-        pass
+        c = self.text.getCursorPosition()
+        
         # c = self.text.textCursor()
 
-        # line = c.blockNumber() + 1 #MERE MORTALS LIKE THEIR LINES TO BEGIN AT 1
-        # col = c.columnNumber() + 1 #MERE MORTALS LIKE THEIR COLS TO BEGIN AT 1
+        line = c[0] + 1 #MERE MORTALS LIKE THEIR LINES TO BEGIN AT 1
+        col = c[1] + 1 #MERE MORTALS LIKE THEIR COLS TO BEGIN AT 1
 
-        # self.status_bar.showMessage("{}::{}".format(line,col))
+        self.status_bar.showMessage("{}::{}".format(line,col))
 
 def main():
 
