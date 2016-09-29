@@ -1,7 +1,7 @@
 import sys
 from editor import Editor
-from PyQt4 import QtGui, QtCore
-from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython
+from PyQt4 import QtGui, QtCore, Qsci
+
 
 
 
@@ -18,7 +18,7 @@ class App(QtGui.QMainWindow):
         self.setGeometry(0,0,self.width,self.height)
 
         self.setWindowTitle("OmegaIDE")
-        self.text = Editor()
+        self.text = Editor(Qsci.QsciLexerPython(self))
         self.text.cursorPositionChanged.connect(self.show_cursor_pos)
 
         self.setCentralWidget(self.text)
@@ -29,8 +29,17 @@ class App(QtGui.QMainWindow):
         
         self.init_menubar()
 
+<<<<<<< HEAD
         self.init_status_bar()
         
+=======
+        self.status_bar = self.statusBar()
+        self.status_bar_text = QtGui.QLabel()
+        self.status_bar_text.setText("")
+        self.status_bar.addWidget(self.status_bar_text)
+
+    def init_formatbar(self):
+>>>>>>> master
 
     
     def init_status_bar(self):
@@ -127,17 +136,27 @@ class App(QtGui.QMainWindow):
         self.file = ""
 
     def show_cursor_pos(self):
+<<<<<<< HEAD
 
         c = self.text.getCursorPosition()
+=======
+        c = self.text.getCursorPosition()
+        
+>>>>>>> master
         # c = self.text.textCursor()
 
         line = c[0] + 1 #MERE MORTALS LIKE THEIR LINES TO BEGIN AT 1
         col = c[1] + 1 #MERE MORTALS LIKE THEIR COLS TO BEGIN AT 1
+<<<<<<< HEAD
 
         self.status_bar_text.setText("{}::{}".format(line,col))
         #self.status_bar_text.setText
         #self.status_bar.clearMessage()
         #self.status_bar.showMessage("{}::{}".format(line,col))
+=======
+        
+        self.status_bar_text.setText("{}::{}".format(line,col))
+>>>>>>> master
 
 def main():
 
