@@ -7,3 +7,8 @@
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/System.Numerics.dll
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/Core.dll
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/OmegaIDE.FSharp.CommonLib.dll
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/obj/x86/Release/.NETFramework,Version=v4.5.AssemblyAttribute.fs
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/config
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/fsharp
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/python
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/OmegaIDE.Backend.File.exe

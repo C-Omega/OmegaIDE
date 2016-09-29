@@ -1,0 +1,6 @@
+﻿@literalstring@".*";
+@comment@#.*\n;
+@literal@(?<!\w)\d;
+@literal@true|false;
+@majorkeyword@while|if|else|elif|def|import|from;
+@minorkeyword@range|print|int|float|str;
