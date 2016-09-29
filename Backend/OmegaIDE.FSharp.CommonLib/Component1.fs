@@ -396,7 +396,6 @@ module Compilers =
                         |_ -> State.IPCErr
                 }
                 |> Some
-            |_ -> None
     type CompilerFile = 
         {
             path : string

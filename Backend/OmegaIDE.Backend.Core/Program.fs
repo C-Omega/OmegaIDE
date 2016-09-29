@@ -28,5 +28,6 @@ let main argv =
         |Normal       ,s -> cprint Colour.Black s
         |Type         ,s -> cprint Colour.DarkGreen s
     )
+    System.Console.ReadLine()
     0 // return an integer exit code
 
