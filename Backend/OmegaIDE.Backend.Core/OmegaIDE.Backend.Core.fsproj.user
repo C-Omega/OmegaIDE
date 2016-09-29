@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <StartAction>Program</StartAction>
+    <StartProgram>mono %24{TargetDir}\OmegaIDE.Backend.Core.exe</StartProgram>
+    <ExternalConsole>true</ExternalConsole>
+    <ConsolePause>true</ConsolePause>
+    <TargetRuntimeId>Mono 4.6.1</TargetRuntimeId>
+  </PropertyGroup>
+</Project>

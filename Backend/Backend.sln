@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "OmegaIDE.Page", "OmegaIDE.Page\OmegaIDE.Page.fsproj", "{6D2F7E11-C24C-41F6-A2A2-4625225C39C5}"
-EndProject
 Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "OmegaIDE.FSharp.CommonLib", "OmegaIDE.FSharp.CommonLib\OmegaIDE.FSharp.CommonLib.fsproj", "{1E34C246-8574-436D-B056-B08B4E53B8E9}"
 EndProject
 Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Core", "Core\Core.fsproj", "{D5136B1A-4B66-4905-B248-8805E22A018D}"
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "OmegaIDE.Backend.File", "OmegaIDE.Backend.File\OmegaIDE.Backend.File.fsproj", "{D26D2C32-06BE-4ED1-8920-ED266F94D33A}"
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "OmegaIDE.Backend.Core", "OmegaIDE.Backend.Core\OmegaIDE.Backend.Core.fsproj", "{A17FACF6-33F7-401A-A4D6-DE7C9324F7D0}"
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "OmegaIDE.Backend.Compiler", "OmegaIDE.Backend.Compiler\OmegaIDE.Backend.Compiler.fsproj", "{1DA2E704-9128-4DA9-878B-D7A943F714F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +17,22 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1DA2E704-9128-4DA9-878B-D7A943F714F1}.Debug|x86.ActiveCfg = Debug|x86
+		{1DA2E704-9128-4DA9-878B-D7A943F714F1}.Debug|x86.Build.0 = Debug|x86
+		{1DA2E704-9128-4DA9-878B-D7A943F714F1}.Release|x86.ActiveCfg = Release|x86
+		{1DA2E704-9128-4DA9-878B-D7A943F714F1}.Release|x86.Build.0 = Release|x86
 		{1E34C246-8574-436D-B056-B08B4E53B8E9}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{1E34C246-8574-436D-B056-B08B4E53B8E9}.Debug|x86.Build.0 = Debug|Any CPU
 		{1E34C246-8574-436D-B056-B08B4E53B8E9}.Release|x86.ActiveCfg = Release|Any CPU
 		{1E34C246-8574-436D-B056-B08B4E53B8E9}.Release|x86.Build.0 = Release|Any CPU
-		{6D2F7E11-C24C-41F6-A2A2-4625225C39C5}.Debug|x86.ActiveCfg = Debug|x86
-		{6D2F7E11-C24C-41F6-A2A2-4625225C39C5}.Debug|x86.Build.0 = Debug|x86
-		{6D2F7E11-C24C-41F6-A2A2-4625225C39C5}.Release|x86.ActiveCfg = Release|x86
-		{6D2F7E11-C24C-41F6-A2A2-4625225C39C5}.Release|x86.Build.0 = Release|x86
+		{A17FACF6-33F7-401A-A4D6-DE7C9324F7D0}.Debug|x86.ActiveCfg = Debug|x86
+		{A17FACF6-33F7-401A-A4D6-DE7C9324F7D0}.Debug|x86.Build.0 = Debug|x86
+		{A17FACF6-33F7-401A-A4D6-DE7C9324F7D0}.Release|x86.ActiveCfg = Release|x86
+		{A17FACF6-33F7-401A-A4D6-DE7C9324F7D0}.Release|x86.Build.0 = Release|x86
+		{D26D2C32-06BE-4ED1-8920-ED266F94D33A}.Debug|x86.ActiveCfg = Debug|x86
+		{D26D2C32-06BE-4ED1-8920-ED266F94D33A}.Debug|x86.Build.0 = Debug|x86
+		{D26D2C32-06BE-4ED1-8920-ED266F94D33A}.Release|x86.ActiveCfg = Release|x86
+		{D26D2C32-06BE-4ED1-8920-ED266F94D33A}.Release|x86.Build.0 = Release|x86
 		{D5136B1A-4B66-4905-B248-8805E22A018D}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{D5136B1A-4B66-4905-B248-8805E22A018D}.Debug|x86.Build.0 = Debug|Any CPU
 		{D5136B1A-4B66-4905-B248-8805E22A018D}.Release|x86.ActiveCfg = Release|Any CPU
