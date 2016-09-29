@@ -26,14 +26,18 @@ class App(QtGui.QMainWindow):
         self.init_file_manager()
 
         self.init_toolbar()
-        self.init_formatbar()
+        
         self.init_menubar()
 
+        self.init_status_bar()
+        
+
+    
+    def init_status_bar(self):
         self.status_bar = self.statusBar()
-
-    def init_formatbar(self):
-
-        self.formatbar = self.addToolBar("Format")
+        self.status_bar_text = QtGui.QLabel()
+        self.status_bar_text.setText("Test")
+        self.status_bar.addWidget(self.status_bar_text)
 
     def init_menubar(self):
 
@@ -123,13 +127,17 @@ class App(QtGui.QMainWindow):
         self.file = ""
 
     def show_cursor_pos(self):
-        pass
+
+        c = self.text.getCursorPosition()
         # c = self.text.textCursor()
 
-        # line = c.blockNumber() + 1 #MERE MORTALS LIKE THEIR LINES TO BEGIN AT 1
-        # col = c.columnNumber() + 1 #MERE MORTALS LIKE THEIR COLS TO BEGIN AT 1
+        line = c[0] + 1 #MERE MORTALS LIKE THEIR LINES TO BEGIN AT 1
+        col = c[1] + 1 #MERE MORTALS LIKE THEIR COLS TO BEGIN AT 1
 
-        # self.status_bar.showMessage("{}::{}".format(line,col))
+        self.status_bar_text.setText("{}::{}".format(line,col))
+        #self.status_bar_text.setText
+        #self.status_bar.clearMessage()
+        #self.status_bar.showMessage("{}::{}".format(line,col))
 
 def main():
 
