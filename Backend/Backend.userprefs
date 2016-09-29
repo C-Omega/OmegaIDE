@@ -1,1 +1,13 @@
-﻿<Properties StartupItem="OmegaIDE.Page/OmegaIDE.Page.fsproj" />
+﻿<Properties StartupItem="OmegaIDE.Page/OmegaIDE.Page.fsproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="OmegaIDE.Page/Program.fs">
+    <Files>
+      <File FileName="OmegaIDE.FSharp.CommonLib/Component1.fs" Line="230" Column="48" />
+      <File FileName="OmegaIDE.Page/Program.fs" Line="6" Column="21" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
