@@ -1,0 +1,9 @@
+/home/harlan/IDE/Backend/OmegaIDE.Page/obj/x86/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.fs
+/home/harlan/IDE/Backend/OmegaIDE.Page/bin/Debug/OmegaIDE.FSharp.CommonLib.dll
+/home/harlan/IDE/Backend/OmegaIDE.Page/bin/Debug/OmegaIDE.FSharp.CommonLib.dll.mdb
+/home/harlan/IDE/Backend/OmegaIDE.Page/bin/Debug/Core.dll
+/home/harlan/IDE/Backend/OmegaIDE.Page/bin/Debug/Core.dll.mdb
+/home/harlan/IDE/Backend/OmegaIDE.Page/bin/Debug/OmegaIDE.Page.exe.mdb
+/home/harlan/IDE/Backend/OmegaIDE.Page/bin/Debug/OmegaIDE.Page.exe
+/home/harlan/IDE/Backend/OmegaIDE.Page/obj/x86/Debug/OmegaIDE.Page.exe
+/home/harlan/IDE/Backend/OmegaIDE.Page/obj/x86/Debug/OmegaIDE.Page.exe.mdb
