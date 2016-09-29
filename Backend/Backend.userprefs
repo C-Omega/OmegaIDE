@@ -1,11 +1,13 @@
-﻿<Properties StartupItem="OmegaIDE.Page/OmegaIDE.Page.fsproj">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="OmegaIDE.Page/Program.fs">
+﻿<Properties StartupConfiguration="{A17FACF6-33F7-401A-A4D6-DE7C9324F7D0}|Default">
+  <MonoDevelop.Ide.ItemProperties.OmegaIDE.Backend.Core PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="OmegaIDE.Backend.Core/Program.fs">
     <Files>
-      <File FileName="OmegaIDE.FSharp.CommonLib/Component1.fs" Line="230" Column="48" />
-      <File FileName="OmegaIDE.Page/Program.fs" Line="6" Column="21" />
+      <File FileName="OmegaIDE.FSharp.CommonLib/Component1.fs" Line="60" Column="41" />
+      <File FileName="OmegaIDE.Backend.Core/Program.fs" Line="9" Column="31" />
     </Files>
   </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.OmegaIDE.Page PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -1,0 +1,3 @@
+/home/harlan/IDE/Backend/OmegaIDE.Backend.File/obj/x86/Release/.NETFramework,Version=v4.5.AssemblyAttribute.fs
+/home/harlan/IDE/Backend/OmegaIDE.Backend.File/bin/Release/OmegaIDE.Backend.File.exe
+/home/harlan/IDE/Backend/OmegaIDE.Backend.File/obj/x86/Release/OmegaIDE.Backend.File.exe

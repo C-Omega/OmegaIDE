@@ -15,7 +15,32 @@ module Core =
     let getgroups (c:Match) = c.Groups |> Seq.cast<Group> |> Seq.skip 1 |> Seq.map (fun (c:Group) -> c.Value)
     let regex s = Regex(s,RegexOptions.Singleline)
     let regexremove r s = Regex.Replace(s,r,"",RegexOptions.Singleline)
+    let udpv4() = new System.Net.Sockets.Socket(System.Net.Sockets.AddressFamily.InterNetwork,System.Net.Sockets.SocketType.Dgram,System.Net.Sockets.ProtocolType.Udp)
+    let start a = 
+        function
+        |[||] -> System.Diagnostics.Process.Start(a:string)
+        |  b  -> System.Diagnostics.Process.Start(a,String.concat " " b)
+module KVFile =
+    type KVFile = 
+        {nodes : (string * string) list}
+        override x.ToString() = List.fold(fun acc (key,value) -> acc+"@"+key+"@"+value+";\n") "" x.nodes
+        member x.Item(i) = List.pick(fun (a,b) -> if i = a then Some b else None) x.nodes
+        static member OfString (s:string) = 
+            {
+                nodes = 
+                    regex(@"@(.*)@(.*);").Matches(s) 
+                    |> Seq.cast<Match> 
+                    |> Seq.map (getgroups >> Array.ofSeq>>function |[|i;j|] -> i,j|_ -> failwith "bad match")
+                    |> List.ofSeq
+            }
+module Threading =
+    open System.Threading
+    open System.Threading
+    open System.Threading.Tasks
+    open System.Diagnostics
+
 module ProjectFile = 
+    open KVFile
     type ProjectFileNode = 
         {location : string; language : string; platforms : string[]; buildmode:string}//checksum : byte[]}
         override x.ToString() = x.location+":"+x.language+"?"+String.concat "," x.platforms+"!"+x.buildmode //+"?"+(tobase64 x.checksum)
@@ -32,25 +57,24 @@ module ProjectFile =
     type ProjectFile = 
         {
             name : string
-            nodes : ProjectFileNode[]
+            nodes : ProjectFileNode list
         }
-        override x.ToString() = "@name@"+x.name+";\n"+(Array.fold (fun acc elem -> acc + "\n@node@" + string elem + ";") "" x.nodes)
-        static member OfString (s:string) = 
+        override x.ToString() = "@name@"+x.name+";\n"+(List.fold (fun acc elem -> acc + "\n@node@" + string elem + ";") "" x.nodes)
+        static member OfKVFile (s:KVFile) = 
             //this removes any form of newline (CRLF or LF), and elimits it by semicolons
             //let s = System.Text.RegularExpressions.Regex.Replace(s,"[\r\n]","").Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
-            let v = regex(@"@(.*)@(.*);").Matches(s) |> Seq.cast<Match> |> Seq.map (getgroups >> Array.ofSeq) |> List.ofSeq
+            let v = s.nodes//regex(@"@(.*)@(.*);").Matches(s) |> Seq.cast<Match> |> Seq.map (getgroups >> Array.ofSeq) |> List.ofSeq
             //a recursive parser
             let rec parse = function
                 |[],name,nodes -> name,nodes
-                |(a:string[])::b,name,nodes -> 
+                |(x,y)::b,name,nodes -> 
                     //get the type and the value
-                    let x,y = a.[0],a.[1]
                     match x with
                     |"name" -> parse(b,y,nodes)
                     |"node" -> parse(b,name,ProjectFileNode.OfString y :: nodes)
                     |s -> raise (System.ArgumentException(s))
             let name,nodes = parse (v,"",[])
-            {name = name; nodes = Array.ofList nodes}
+            {name = name; nodes = nodes}
 module Graphics = 
     type RGBA = 
         {red:byte;green:byte;blue:byte;alpha:byte}
@@ -83,6 +107,7 @@ module Modules =
         |LiteralString
         |Comment
         |Preprocessor//   =   5uy
+        |Type
     type DescribedString = {s:string; style : Style; keywordtype : KeywordType}
     type GraphicString   = {s:string; foreground : RGBA; background : RGBA; style : Style}
     module Highlighting =
@@ -94,21 +119,24 @@ module Modules =
                     |[],c -> c
                     |a::b,c -> 
                         //get the type
-                        let x,y = (a:string).IndexOf '@', a.IndexOfAny([|'@';' '|],1)
-                        let i = a.IndexOf('@',1)
+                        let x = (a:string).IndexOf '@'
+                        let y = a.IndexOf('@',x+1)
+                        printfn "%A" (x,y)
                         //get the value
-                        let z = regex(a.[i+1..])
+                        let z = regex(a.[y+1..])
                         match a.[x+1..y-1].ToLower() with
                         |"majorkeyword" ->  parse(b,(MajorKeyword, z) :: c)
                         |"minorkeyword" ->  parse(b,(MinorKeyword, z) :: c)
                         |"literal" ->       parse(b,(Literal, z) :: c)
                         |"literalstring" -> parse(b,(LiteralString, z) :: c)
                         |"comment" ->       parse(b,(Comment, z) :: c)
+                        |"type"          -> parse(b,(Type, z) :: c)
+                        |""              -> parse(b,c)
                         |s -> raise (System.ArgumentException(s))
                 let t = parse(s.Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray,[]) |> Array.ofList
                 let c = Array.Parallel.choose (function |Comment, r -> Some r |_ -> None) t
-                let l = Array.Parallel.choose (function |Literal, r -> Some r |_ -> None) t
-                let r = Array.Parallel.choose (function |Comment,_ |Literal, _ -> None |a,b -> Some(a,b)) t
+                let l = Array.Parallel.choose (function |LiteralString, r -> Some r |_ -> None) t
+                let r = Array.Parallel.choose (function |Comment,_ -> None |a,b -> Some(a,b)) t
                 let dematch(a:Match) = a.Index,a.Length
                 {update = fun str -> 
                     let s,pass1 = 
@@ -147,7 +175,7 @@ module Modules =
                                 let start = r.Index-1
                                 let stop = r.Index+r.Length
                                 (
-                                    (if start < 0 then "" else acc.[..r.Index-1]) +
+                                    (if start < 0 then "" else acc.[..start]) +
                                     String.replicate (r.Length-1) "\u0002" +
                                     "\u0001" +
                                     (if stop >= acc.Length then "" else acc.[stop..])
@@ -207,18 +235,23 @@ module IPC =
         static member ToByteArray(x) = List.fold(fun acc (elem:Part) -> elem.ToByteArray() :: acc) [] x.parts |> List.rev |> Array.concat
     open System.Net
     open System.Net.Sockets
-    type IPC(local:IPEndPoint,remote:IPEndPoint) = 
-        let socket = new UdpClient(local)
-        do socket.Connect(remote)
-        member x.Bind(ep:IPEndPoint) = socket.Client.Bind ep
-        member x.LocalEndpoint = socket.Client.LocalEndPoint :?> IPEndPoint
-        member x.RemoteEndpoint= socket.Client.RemoteEndPoint:?> IPEndPoint
-        member x.Send(p:Packet) = let b = Packet.ToByteArray p in socket.Send(b,b.Length) |> ignore
+    type IPC (socket:Socket) = 
+        //let socket = new UdpClient(local)
+        //do socket.Connect(remote)
+        member x.Bind(ep:IPEndPoint) = socket.Bind ep
+        member x.Connect(ep:IPEndPoint) = socket.Connect ep
+        member x.LocalEndpoint = socket.LocalEndPoint :?> IPEndPoint
+        member x.RemoteEndpoint= socket.RemoteEndPoint:?> IPEndPoint
+        member x.Send(p:Packet) = let b = Packet.ToByteArray p in socket.Send(b) |> ignore
         member x.Receive() = 
-            //spinuntil(fun () -> socket.Available > 0) //poll the socket
-            let v = ref remote
-            socket.Receive(v)
+            spinuntil(fun () -> socket.Available > 0) //poll the socket
+            //let v = ref x.RemoteEndpoint
+            let b = Array.zeroCreate<byte> socket.Available
+            b.[..socket.Receive(b)-1]
             |> Packet.OfByteArray
+        new(local:IPEndPoint,remote:IPEndPoint) as x = new IPC(local) then x.Connect remote
+        new(local:IPEndPoint)                   as x = new IPC(udpv4()) then x.Bind local
+        new()                                        = new IPC(ep anyv4 0)
 module Tree = 
     type LabelledTree<'Label,'a when 'Label : equality> = 
         |Branch of 'Label * (LabelledTree<'Label,'a> list )
@@ -232,19 +265,70 @@ module Tree =
             match x with
             |Branch(s,l) -> List.find(LabelledTree<'Label,'a>.GetLabel >> ((=) i)) l
             |_           -> failwith "Not a branch"
+    type KVTree = 
+        |Branch of label:string * (KVTree list)
+        |Root   of KVTree list
+        |Leaf of label:string * value:string
+        static member GetLabel(x) = match x with |Branch(l,_)|Leaf(l,_) -> l|_ ->failwith "No label"
+        member x.Value = 
+            match x with
+            |Leaf(_,v) -> v
+            |_         -> failwith "Not a leaf"
+        member x.Item 
+            with get(i) =
+                match x with
+                |Branch(_,l) 
+                |Root     l  -> List.find(KVTree.GetLabel >> ((=) i)) l
+                |_           -> failwith "Not a branch"
+        override x.ToString() =
+            let rec inner i j = 
+                let v = String.replicate i "\t"
+                List.map (function 
+                    |Branch(l,t) -> String.concat "" [|v; "{;"; l; ";\n"; inner (i+1) t; "\n"; v; "};"|]
+                    |Root(l)     -> inner i l
+                    |Leaf(a,b) -> v + "@" + a + "@" + b + ";"
+                ) j
+                |> String.concat "\n"
+            inner 0 (match x with |Branch(_,l)|Root l -> l |i -> [i])
+        static member OfString(s:string) =
+            //recursive regex
+            let rec inner : string list * _ list -> string list * _ list = function
+                |[],acc -> [],acc
+                |a::n::l,acc when a.Contains("{") -> let a,b = inner(l,[]) in inner(a,Branch(n,b)::acc)
+                |a::l,acc when a.Contains("}")-> l,(List.rev acc)
+                |v::l,acc -> let j = regex(@"@(.*)@(.*)").Match(v)|> getgroups |> Array.ofSeq in inner(l,Leaf(j.[0],j.[1])::acc)
+            Root(inner((regexremove @"\n|\r|\t|    " s).Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries)|>List.ofArray,[]) |> snd)
+        static member ToKVFile x = 
+            match x with 
+            |Branch(_,l)
+            |Root(l) -> {KVFile.KVFile.nodes=List.choose(function |Leaf(l,v) -> Some(l,v)|_ -> None) l}
+            |Leaf(k,v) -> {KVFile.KVFile.nodes=[k,v]}
+        static member OfKVFile (y:KVFile.KVFile) = Root(y.nodes|>List.map Leaf)
+        static member RootToBranch k x = match x with |Root l -> Branch(k,l)|>Some |_ -> None
+        static member (+) (x, y) =
+            match x,y with 
+            |Root(v)    ,Branch(_,v')
+            |Root(v)    ,Root     v'  -> Root  (  v@v')
+            |Branch(l,v),Branch(_,v')   
+            |Branch(l,v),Root     v'  -> Branch(l,v@v')
+            |Leaf _ as a,(Leaf (_,_) as b) -> Root([a;b])
+            |Root(v)    ,(Leaf (_,_) as b) -> Root(b::v)
+            |Branch(l,v),(Leaf (_,_) as b) -> Branch(l,b::v)
+            |a          ,b                 -> failwithf "Cannot add %A and %A" a b
 module Config =
     open Tree
     type Config = 
         {
-            conf : LabelledTree<string,string> list
+            conf : KVTree list
         }
         member x.Item i = List.find(function |Branch(l,_) when l = i -> true |_ -> false) x.conf
         override x.ToString() =
             let rec inner i j = 
                 let v = String.replicate i "\t"
                 List.map (function 
+                    |Root   l    -> List.fold(fun acc elem -> acc+"\n"+string elem) "" l
                     |Branch(l,t) -> String.concat "" [|v; "{;"; l; ";\n"; inner (i+1) t; "\n"; v; "};"|]
-                    |Leaf(a,b) -> v + "@" + a + "@" + b + ";"
+                    |Leaf  (a,b) -> v + "@" + a + "@" + b + ";"
                 ) j
                 |> String.concat "\n"
             inner 0 x.conf
@@ -270,3 +354,59 @@ module Config =
                 leaves @ branches |> side (printfn "%A")
             {conf = inner s}
         o*)
+module Compilers =
+    open KVFile
+    open IPC
+    open ProjectFile
+    type State = 
+        |Nothing    =   0uy
+        |Compiling  =   1uy
+        |IOErr      =   2uy
+        |BadInput   =   3uy
+        |BadSystem  =   4uy
+        |IPCErr     = 255uy
+    type Job = 
+        {
+            get_progress : unit -> byte
+            get_output   : unit -> string
+            get_state    : unit -> State
+            guid         : System.Guid
+        }
+    type Compiler(ipc:IPC) =
+        member x.CompileProject (p:ProjectFile) = 
+            {parts=[String "compile";String p.name]@(List.map (string >> String) p.nodes)} |> ipc.Send
+            match ipc.Receive().parts with 
+            |[String "job";Bytes guid] ->
+                {
+                    guid            = System.Guid(guid)
+                    get_progress    = fun () -> 
+                        ipc.Send {parts=[String "get_progress";Bytes guid]}
+                        match ipc.Receive().parts with
+                        |[Bytes [|b|];Bytes v ] when v = guid -> b
+                        |_ -> 0uy
+                    get_output = fun() ->
+                        ipc.Send {parts=[String "get_output";Bytes guid]}
+                        match ipc.Receive().parts with
+                        |_ -> ""
+                        |[String s;Bytes v] when v = guid -> s
+                    get_state = fun() ->
+                        ipc.Send {parts=[String "get_state";Bytes guid]}
+                        match ipc.Receive().parts with
+                        |[Bytes [|b|];Bytes v ] when v = guid -> enum b
+                        |_ -> State.IPCErr
+                }
+                |> Some
+    type CompilerFile = 
+        {
+            path : string
+            lang : string
+        }
+        static member FromKVFile(v:KVFile) = {path=v.["path"];lang=v.["lang"]}
+        member x.GetCompiler() = 
+            let ipc = IPC()
+            start x.path [|ipc.LocalEndpoint.Address.ToString();ipc.RemoteEndpoint.Port.ToString()|]|>ignore
+            match ipc.Receive().parts with 
+            |[String "bound to"; Bytes b] ->
+                _b_int32 b |> ep loopbackv4 |> ipc.Connect
+                Some(new Compiler(ipc))
+            |_ -> None
