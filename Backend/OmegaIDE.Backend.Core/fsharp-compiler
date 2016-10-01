@@ -1,0 +1,13 @@
+﻿@comment@\//([^\n])*;
+@comment@\(\*.*\*\);
+@literalstring@"[^"]*";
+@literalstring@'.';
+@literalstring@'\\.';
+@literalstring@'\\\\';
+@literalstring@'\\u[0-9a-fA-F]{4}';
+@literal@(?<!\w)(0x|0b|)\d+(uy|us|ul|y|s|l|I|\.(?!\.)|);
+@literal@true|false;
+@majorkeyword@(?<=[^\w]|^)(for|let|do|in|while|done|type|match|with|open|function|module|namespace|of)(?=[^\w]|$);
+@minorkeyword@(?<![\!\%\&\*\+\-\.\/\<\=\>\?\@\^\|\~])(<-|->|\:\:|\.\.)(?![\!\%\&\*\+\-\.\/\<\=\>\?\@\^\|\~]);
+@type@(?<=[^:]: *)(?=\w)(\w|)+;
+@type@(?<=[^\w]|^)(int|string|byte|\[\]|list|int(|16|32|64)|uint(|16|32|64)|byte|sbyte)\b;
