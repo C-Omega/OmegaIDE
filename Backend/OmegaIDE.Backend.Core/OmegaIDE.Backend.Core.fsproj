@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -7,14 +7,15 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>OmegaIDE.Backend.Core</RootNamespace>
     <AssemblyName>OmegaIDE.Backend.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants></DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <Externalconsole>true</Externalconsole>
   </PropertyGroup>
@@ -24,18 +25,44 @@
     <ErrorReport>prompt</ErrorReport>
     <Externalconsole>true</Externalconsole>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-  </ItemGroup>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <StartAction>Project</StartAction>
+    <StartProgram>mono %24{TargetDir}\OmegaIDE.Backend.Core.exe</StartProgram>
+    <ExternalConsole>true</ExternalConsole>
+    <ConsolePause>false</ConsolePause>
+    <TargetRuntimeId>Mono 4.6.1</TargetRuntimeId>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
+  <ItemGroup>
+    <None Include="config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="fsharp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="python">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Policies>
+          <VersionControlPolicy inheritsSet="Mono" />
+        </Policies>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
+  <ItemGroup>
+    <Reference Include="FSharp.Core" />
+    <Reference Include="System.Core" />
+    <Reference Include="System" />
+    <Reference Include="System.Numerics" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.fsproj">
       <Project>{D5136B1A-4B66-4905-B248-8805E22A018D}</Project>
@@ -49,16 +76,9 @@
       <Project>{1E34C246-8574-436D-B056-B08B4E53B8E9}</Project>
       <Name>OmegaIDE.FSharp.CommonLib</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="fsharp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="python">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="..\OmegaIDE.Backend.Compiler\OmegaIDE.Backend.Compiler.fsproj">
+      <Project>{1DA2E704-9128-4DA9-878B-D7A943F714F1}</Project>
+      <Name>OmegaIDE.Backend.Compiler</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

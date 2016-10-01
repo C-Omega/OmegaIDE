@@ -12,9 +12,14 @@ let cprint c s =
 [<EntryPoint>]
 let main argv = 
     let file = IPC()
-    printfn "%A" <| String.concat " "[|string loopbackv4;string file.LocalEndpoint.Port; "config"|]
-    let f = System.Diagnostics.Process.Start("OmegaIDE.Backend.File.exe",String.concat " "[|string file.LocalEndpoint.Address;string file.LocalEndpoint.Port; "config"|])
-    match file.Receive() with |{parts = [String "bound to"; Bytes b]} -> _b_int32 b |> ep loopbackv4 |> file.Connect |_ -> ()
+    let f = System.Diagnostics.Process.Start("OmegaIDE.Backend.File.exe",String.concat " "[|string loopbackv4;string file.LocalEndpoint.Port; "config"|])
+    match file.Receive() with |{parts = [String "bound to"; Bytes b]} -> b |> _b_int32 |> ep loopbackv4 |> file.Connect |_ -> ()
+    let compiler = IPC()
+    let c = System.Diagnostics.Process.Start("OmegaIDE.Backend.Compiler.exe",String.concat " "[|string loopbackv4;string compiler.LocalEndpoint.Port; "config"|])
+    match compiler.Receive() with |{parts = [String "bound to"; Bytes b]} -> b |> _b_int32 |> ep loopbackv4 |> compiler.Connect |_ -> ()
+
+    0
+    (*
     file.Send{parts = [String "get"; String "highlighter"; String "fsharp"]}
     let h = match file.Receive() with |{parts = [String "got"; String "highlighter"; String "fsharp"; String v]} -> Highlighting.SyntaxHighlighter.OfString v |e ->failwithf "%A" e
     printfn "%O" h
@@ -27,7 +32,9 @@ let main argv =
         |Comment      ,s -> cprint Colour.Cyan s
         |Normal       ,s -> cprint Colour.Black s
         |Type         ,s -> cprint Colour.DarkGreen s
+        |Preprocessor ,s -> cprint Colour.DarkCyan s
     )
+    System.Threading.Thread.Sleep -1
     System.Console.ReadLine()
     0 // return an integer exit code
-
+    *)

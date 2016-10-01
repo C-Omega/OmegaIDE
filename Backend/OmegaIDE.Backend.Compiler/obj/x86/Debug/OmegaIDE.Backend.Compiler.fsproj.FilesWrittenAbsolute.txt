@@ -1,14 +1,9 @@
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/obj/x86/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.fs
-/home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/config
-/home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/fsharp
-/home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/python
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/OmegaIDE.Backend.Compiler.exe.mdb
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/OmegaIDE.Backend.Compiler.exe
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/obj/x86/Debug/OmegaIDE.Backend.Compiler.exe
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/obj/x86/Debug/OmegaIDE.Backend.Compiler.exe.mdb
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/Core.dll
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/Core.dll.mdb
-/home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/OmegaIDE.Backend.Core.exe
-/home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/OmegaIDE.Backend.Core.exe.mdb
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/OmegaIDE.FSharp.CommonLib.dll
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Compiler/bin/Debug/OmegaIDE.FSharp.CommonLib.dll.mdb

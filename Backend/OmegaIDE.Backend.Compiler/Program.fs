@@ -3,9 +3,38 @@
 open C_Omega
 open C_Omega.Helpers
 open OmegaIDE
-open OmegaIDE
+open OmegaIDE.FSharp
+open OmegaIDE.FSharp.Compilers
+open OmegaIDE.FSharp.Config
+open OmegaIDE.FSharp.IPC
+open OmegaIDE.FSharp.ProjectFile
+open OmegaIDE.FSharp.KVFile
+open System.Collections.Generic
 [<EntryPoint>]
 let main argv = 
-
+    printfn "Compiler daemon running"
+    let ipc = IPC(ep anyv4 0, ep (ip argv.[0]) (int argv.[1]))
+    ipc.Send {parts = [String "bound to"; Bytes(_int32_b ipc.LocalEndpoint.Port)]}
+    let mutable config = System.IO.File.ReadAllText argv.[2] |> Config.OfString
+    let compilers = new Dictionary<string,Compiler>()
+    try
+        match ipc.Receive().parts with
+        |[String "compile";String project] ->
+            let project = project |> KVFile.OfString |> ProjectFile.OfKVFile
+            match compilers.TryGetValue project.nodes.Head.language with //evil hack to get the language. I will deal with this later.
+            |true,compiler -> 
+                match compiler.CompileProject(project).Value with
+                |{guid = g} -> ipc.Send {parts = [String "compiling"; Bytes <| g.ToByteArray()]}
+            |_      -> ()
+        |[String "load";   String compiler] ->
+            let cf = compiler |> KVFile.OfString |> CompilerFile.FromKVFile config
+            let compiler = cf.GetCompiler().Value
+            List.iter (fun l -> 
+                compilers.Remove(l) |> ignore //If we already have a setup for this language, remove it
+                compilers.Add   (l,compiler) 
+            ) cf.langs  
+        |[String "reload"; String "config"] -> config <- System.IO.File.ReadAllText argv.[2] |> Config.OfString;
+        |e -> failwithf "Didn't match: %A" e
+    with
+    |e -> {parts = [String "exn"; String (e.ToString())]} |> ipc.Send
     0 // return an integer exit code
-

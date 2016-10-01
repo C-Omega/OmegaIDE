@@ -1,2 +1,4 @@
 ﻿{;default paths;
 	@highlighter@./;
+	@compiler@../../../../Compilers/;
+}

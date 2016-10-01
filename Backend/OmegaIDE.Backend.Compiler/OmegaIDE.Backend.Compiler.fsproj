@@ -37,9 +37,9 @@
       <Project>{D5136B1A-4B66-4905-B248-8805E22A018D}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OmegaIDE.Backend.Core\OmegaIDE.Backend.Core.fsproj">
-      <Project>{A17FACF6-33F7-401A-A4D6-DE7C9324F7D0}</Project>
-      <Name>OmegaIDE.Backend.Core</Name>
+    <ProjectReference Include="..\OmegaIDE.FSharp.CommonLib\OmegaIDE.FSharp.CommonLib.fsproj">
+      <Project>{1E34C246-8574-436D-B056-B08B4E53B8E9}</Project>
+      <Name>OmegaIDE.FSharp.CommonLib</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>
