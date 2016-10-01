@@ -28,7 +28,7 @@ module KVFile =
         static member OfString (s:string) = 
             {
                 nodes = 
-                    regex(@"@(.*)@(.*);").Matches(s) 
+                    regex(@"@([^@]*)@([^;]*);").Matches(s) 
                     |> Seq.cast<Match> 
                     |> Seq.map (getgroups >> Array.ofSeq>>function |[|i;j|] -> i,j|_ -> failwith "bad match")
                     |> List.ofSeq
@@ -42,8 +42,8 @@ module Threading =
 module ProjectFile = 
     open KVFile
     type ProjectFileNode = 
-        {location : string; language : string; platforms : string[]; buildmode:string}//checksum : byte[]}
-        override x.ToString() = x.location+":"+x.language+"?"+String.concat "," x.platforms+"!"+x.buildmode //+"?"+(tobase64 x.checksum)
+        {location : string; language : string; platforms : string[]; compilemode:string}//checksum : byte[]}
+        override x.ToString() = x.location+":"+x.language+"?"+String.concat "," x.platforms+"!"+x.compilemode //+"?"+(tobase64 x.checksum)
         //static member Checksum x = 
             //{location = x.location; language = x.language; checksum = "@"+x.location+":"+x.language |> ofstring |> checksum}
         static member OfString (s:string) = 
@@ -52,29 +52,37 @@ module ProjectFile =
                 location = m.[0];
                 language = m.[1];
                 platforms = m.[2].Split([|','|],System.StringSplitOptions.RemoveEmptyEntries);
-                buildmode = m.[3];
+                compilemode = m.[3];
             }
     type ProjectFile = 
         {
-            name : string
-            nodes : ProjectFileNode list
+            name      : string
+            output    : string
+            nodes     : ProjectFileNode list
+            buildmode : string
         }
-        override x.ToString() = "@name@"+x.name+";\n"+(List.fold (fun acc elem -> acc + "\n@node@" + string elem + ";") "" x.nodes)
+        override x.ToString() = 
+            "@name@"+x.name+";\n"+
+            "@output@"+x.output+";\n"+
+            "@buildmode@"+x.buildmode+";\n"+
+            (List.fold (fun acc elem -> acc + "\n@node@" + string elem + ";") "" x.nodes)
         static member OfKVFile (s:KVFile) = 
             //this removes any form of newline (CRLF or LF), and elimits it by semicolons
             //let s = System.Text.RegularExpressions.Regex.Replace(s,"[\r\n]","").Split([|';'|],System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
             let v = s.nodes//regex(@"@(.*)@(.*);").Matches(s) |> Seq.cast<Match> |> Seq.map (getgroups >> Array.ofSeq) |> List.ofSeq
             //a recursive parser
             let rec parse = function
-                |[],name,nodes -> name,nodes
-                |(x,y)::b,name,nodes -> 
+                |[]      ,name,nodes,output,buildmode -> name,nodes,output,buildmode
+                |(x,y)::b,name,nodes,output,buildmode -> 
                     //get the type and the value
                     match x with
-                    |"name" -> parse(b,y,nodes)
-                    |"node" -> parse(b,name,ProjectFileNode.OfString y :: nodes)
+                    |"name"      -> parse(b,y,nodes,output,buildmode)
+                    |"node"      -> parse(b,name,ProjectFileNode.OfString y :: nodes,output,buildmode)
+                    |"output"    -> parse(b,name,nodes,y,buildmode)
+                    |"buildmode" -> parse(b,name,nodes,output,y)
                     |s -> raise (System.ArgumentException(s))
-            let name,nodes = parse (v,"",[])
-            {name = name; nodes = nodes}
+            let name,nodes,output,buildmode = parse (v,"",[],"","")
+            {name = name; nodes = nodes; output = output; buildmode = buildmode}
 module Graphics = 
     type RGBA = 
         {red:byte;green:byte;blue:byte;alpha:byte}
@@ -274,8 +282,7 @@ module Tree =
             match x with
             |Leaf(_,v) -> v
             |_         -> failwith "Not a leaf"
-        member x.Item 
-            with get(i) =
+        member x.Item i =
                 match x with
                 |Branch(_,l) 
                 |Root     l  -> List.find(KVTree.GetLabel >> ((=) i)) l
@@ -358,12 +365,17 @@ module Compilers =
     open KVFile
     open IPC
     open ProjectFile
+    open Tree
+    open Config
     type State = 
         |Nothing    =   0uy
         |Compiling  =   1uy
         |IOErr      =   2uy
         |BadInput   =   3uy
         |BadSystem  =   4uy
+        |BadArgs    =   5uy
+        |ErrInt     =   6uy
+        |Compiled   =   7uy
         |IPCErr     = 255uy
     type Job = 
         {
@@ -374,7 +386,7 @@ module Compilers =
         }
     type Compiler(ipc:IPC) =
         member x.CompileProject (p:ProjectFile) = 
-            {parts=[String "compile";String p.name]@(List.map (string >> String) p.nodes)} |> ipc.Send
+            {parts=[String "compile";String (string p)]} |> ipc.Send
             match ipc.Receive().parts with 
             |[String "job";Bytes guid] ->
                 {
@@ -396,17 +408,26 @@ module Compilers =
                         |_ -> State.IPCErr
                 }
                 |> Some
+            |_ -> None
+        member x.Clear(g:System.Guid) = ipc.Send {parts = [String "clear"; Bytes (g.ToByteArray())]}
     type CompilerFile = 
         {
-            path : string
-            lang : string
+            path  : string
+            langs : string list
+            config: Config
         }
-        static member FromKVFile(v:KVFile) = {path=v.["path"];lang=v.["lang"]}
+        static member FromKVFile (config:Config) (v:KVFile) = 
+            {
+                path=config.["default paths"].["compiler"].Value+v.["path"]
+                langs=List.choose (function|"lang",v -> Some v|_ -> None) v.nodes
+                config = config
+            }
         member x.GetCompiler() = 
             let ipc = IPC()
-            start x.path [|ipc.LocalEndpoint.Address.ToString();ipc.RemoteEndpoint.Port.ToString()|]|>ignore
+            start x.path [|ipc.LocalEndpoint.Address.ToString();ipc.LocalEndpoint.Port.ToString()|]|>ignore
             match ipc.Receive().parts with 
             |[String "bound to"; Bytes b] ->
                 _b_int32 b |> ep loopbackv4 |> ipc.Connect
+                ipc.Send {parts = [String "config"; String <| string x.config]}
                 Some(new Compiler(ipc))
             |_ -> None

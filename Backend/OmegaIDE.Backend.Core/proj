@@ -1,0 +1,4 @@
+﻿@name@proj;
+@output@./;
+@buildmode@exe;
+@node@f.fs:fsharp?!compile;

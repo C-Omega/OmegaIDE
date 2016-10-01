@@ -12,3 +12,4 @@
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/fsharp
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/python
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/OmegaIDE.Backend.File.exe
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Release/fsharp-compiler

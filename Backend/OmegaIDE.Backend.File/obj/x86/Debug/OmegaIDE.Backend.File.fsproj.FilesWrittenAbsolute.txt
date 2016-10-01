@@ -3,3 +3,7 @@
 /home/harlan/IDE/Backend/OmegaIDE.Backend.File/bin/Debug/OmegaIDE.Backend.File.exe
 /home/harlan/IDE/Backend/OmegaIDE.Backend.File/obj/x86/Debug/OmegaIDE.Backend.File.exe
 /home/harlan/IDE/Backend/OmegaIDE.Backend.File/obj/x86/Debug/OmegaIDE.Backend.File.exe.mdb
+/home/harlan/IDE/Backend/OmegaIDE.Backend.File/bin/Debug/OmegaIDE.FSharp.CommonLib.dll
+/home/harlan/IDE/Backend/OmegaIDE.Backend.File/bin/Debug/OmegaIDE.FSharp.CommonLib.dll.mdb
+/home/harlan/IDE/Backend/OmegaIDE.Backend.File/bin/Debug/Core.dll
+/home/harlan/IDE/Backend/OmegaIDE.Backend.File/bin/Debug/Core.dll.mdb
