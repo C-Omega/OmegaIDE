@@ -3,7 +3,7 @@ open C_Omega.ArraySliceImprovement
 open C_Omega.Helpers
 open OmegaIDE.FSharp
 open OmegaIDE.FSharp.IPC
-open OmegaIDE.FSharp.Modules
+open OmegaIDE.FSharp.Highlighting
 type Colour = System.ConsoleColor
 let cprint c s = 
     System.Console.ForegroundColor <- c

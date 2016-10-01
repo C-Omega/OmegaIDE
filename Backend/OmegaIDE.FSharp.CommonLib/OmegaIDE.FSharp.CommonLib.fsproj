@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -39,8 +39,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Component1.fs" />
-    <Compile Include="Script.fsx" />
+    <Compile Include="Core.fs" />
+    <Compile Include="KV.fs" />
+    <Compile Include="Config.fs" />
+    <Compile Include="IPC.fs" />
+    <Compile Include="Project.fs" />
+    <Compile Include="Compiler.fs" />
+    <Compile Include="Graphics.fs" />
+    <Compile Include="Highlighting.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
   <ItemGroup>
