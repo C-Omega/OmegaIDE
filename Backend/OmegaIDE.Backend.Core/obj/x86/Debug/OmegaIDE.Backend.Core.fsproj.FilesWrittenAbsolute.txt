@@ -15,3 +15,5 @@
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Debug/OmegaIDE.Backend.File.exe.mdb
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Debug/OmegaIDE.Backend.Compiler.exe
 /home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Debug/OmegaIDE.Backend.Compiler.exe.mdb
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Debug/proj
+/home/harlan/IDE/Backend/OmegaIDE.Backend.Core/bin/Debug/f.fs

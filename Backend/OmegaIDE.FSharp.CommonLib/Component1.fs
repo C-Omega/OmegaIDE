@@ -28,7 +28,7 @@ module KVFile =
         static member OfString (s:string) = 
             {
                 nodes = 
-                    regex(@"@(.*)@(.*);").Matches(s) 
+                    regex(@"@([^@]*)@([^;]*);").Matches(s) 
                     |> Seq.cast<Match> 
                     |> Seq.map (getgroups >> Array.ofSeq>>function |[|i;j|] -> i,j|_ -> failwith "bad match")
                     |> List.ofSeq
@@ -424,7 +424,7 @@ module Compilers =
             }
         member x.GetCompiler() = 
             let ipc = IPC()
-            start x.path [|ipc.LocalEndpoint.Address.ToString();ipc.RemoteEndpoint.Port.ToString()|]|>ignore
+            start x.path [|ipc.LocalEndpoint.Address.ToString();ipc.LocalEndpoint.Port.ToString()|]|>ignore
             match ipc.Receive().parts with 
             |[String "bound to"; Bytes b] ->
                 _b_int32 b |> ep loopbackv4 |> ipc.Connect

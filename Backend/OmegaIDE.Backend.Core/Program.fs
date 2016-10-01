@@ -17,7 +17,11 @@ let main argv =
     let compiler = IPC()
     let c = System.Diagnostics.Process.Start("OmegaIDE.Backend.Compiler.exe",String.concat " "[|string loopbackv4;string compiler.LocalEndpoint.Port; "config"|])
     match compiler.Receive() with |{parts = [String "bound to"; Bytes b]} -> b |> _b_int32 |> ep loopbackv4 |> compiler.Connect |_ -> ()
-
+    compiler.Send {parts = [String "load"   ; String <| System.IO.File.ReadAllText "../../../../Compilers/fsharp"]}
+    compiler.Receive() |> printfn "%A"
+    compiler.Send {parts = [String "compile"; String <| System.IO.File.ReadAllText "proj"]}
+    compiler.Receive() |> printfn "%A"
+    while true do ()
     0
     (*
     file.Send{parts = [String "get"; String "highlighter"; String "fsharp"]}

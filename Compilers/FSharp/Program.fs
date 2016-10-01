@@ -24,10 +24,12 @@ let main argv =
         try
             match ipc.Receive().parts with
             |[String "compile"; String proj] ->
+                printfn "Compiling..."
                 let guid = System.Guid.NewGuid()
                 let progress,output,state = ref 0uy,ref "",ref State.Compiling
                 jobs.Add(guid,{get_progress = justreturn progress >> (!); get_output = justreturn output >> (!); get_state = justreturn state >> (!); guid = guid})
                 async{
+                    printfn "\tJob added"
                     let project = proj |> KVFile.KVFile.OfString |> ProjectFile.OfKVFile
                     let inputs = List.choose (function |{location=s;compilemode="compile"} -> Some s|_ -> None) project.nodes |> Array.ofList
                     let refs   = List.choose (function |{location=s;compilemode="reference"} -> Some ("--reference:" + s)|_ -> None) project.nodes |> Array.ofList 
@@ -38,9 +40,12 @@ let main argv =
                         |"library" ->
                             v.Compile(Array.append [|"fsharpc.exe";"-a";project.name|] additional)
                         |"exe" ->
-                            v.Compile(Array.append [|"fsharpc.exe";"-target:exe";project.name|] additional)
+                            v.Compile(Array.append [|"fsharpc.exe";"--target:exe";"-o:"+project.name+".exe"|] additional)
                         |_ -> failwith "Invalid buildmode"
+                    printfn "\tFinished compiling"
                     if i <> 0 then
+                        printfn "Failed!"
+                        printfn "%A" <| Array.map string errs
                         //Something went wrong. Let's work out what
                         errs
                         |> Array.filter (fun i -> i.Severity = FSharpErrorSeverity.Error)
