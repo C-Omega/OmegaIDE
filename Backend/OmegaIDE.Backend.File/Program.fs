@@ -5,10 +5,10 @@ open C_Omega.ArraySliceImprovement
 open C_Omega.Helpers
 open OmegaIDE.FSharp
 open OmegaIDE.FSharp.IPC
-open OmegaIDE.FSharp.ProjectFile
-open OmegaIDE.FSharp.Modules.Highlighting
+open OmegaIDE.FSharp.Project
+open OmegaIDE.FSharp.Highlighting
 open OmegaIDE.FSharp.Config
-open OmegaIDE.FSharp.Tree
+open OmegaIDE.FSharp.KVTree
 open System.IO
 [<EntryPoint>]
 let main argv = 

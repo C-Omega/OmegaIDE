@@ -4,10 +4,10 @@ open C_Omega
 open C_Omega.Helpers
 open OmegaIDE
 open OmegaIDE.FSharp
-open OmegaIDE.FSharp.Compilers
+open OmegaIDE.FSharp.Compiler
 open OmegaIDE.FSharp.Config
 open OmegaIDE.FSharp.IPC
-open OmegaIDE.FSharp.ProjectFile
+open OmegaIDE.FSharp.Project
 open OmegaIDE.FSharp.KVFile
 open System.Collections.Generic
 [<EntryPoint>]
