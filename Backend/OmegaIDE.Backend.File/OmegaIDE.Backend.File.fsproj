@@ -11,11 +11,13 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <Optimize>false</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <Externalconsole>true</Externalconsole>
@@ -31,17 +33,15 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.fsproj">
-      <Project>{D5136B1A-4B66-4905-B248-8805E22A018D}</Project>
-      <Name>Core</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\OmegaIDE.FSharp.CommonLib\OmegaIDE.FSharp.CommonLib.fsproj">
       <Project>{1E34C246-8574-436D-B056-B08B4E53B8E9}</Project>
       <Name>OmegaIDE.FSharp.CommonLib</Name>
-      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Core\Core.fsproj">
+      <Project>{D5136B1A-4B66-4905-B248-8805E22A018D}</Project>
+      <Name>Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
 </Project>
